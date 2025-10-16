@@ -41,7 +41,9 @@ const InputSection = ({
   onHelp,
   onGraph,
   isCalculating,
-  error
+  error,
+  validation,
+  suggestions
 }) => {
   const [showSyntaxTips, setShowSyntaxTips] = React.useState(false);
   return (
@@ -127,6 +129,14 @@ const InputSection = ({
         onChange={(e) => setFunctionValue(e.target.value)}
         placeholder="Ex: (x^2 - 1)/(x - 1)"
         variant="outlined"
+        error={!validation.valid}
+        helperText={
+          !validation.valid 
+            ? validation.errors[0] 
+            : validation.warnings.length > 0 
+            ? validation.warnings[0] 
+            : ''
+        }
         sx={{ 
           mb: 3,
           '& .MuiInputLabel-root': {
@@ -134,6 +144,9 @@ const InputSection = ({
             '&.Mui-focused': {
               color: '#6C63FF'
             }
+          },
+          '& .MuiFormHelperText-root': {
+            color: !validation.valid ? '#FF6B6B' : '#FFD166'
           }
         }}
         InputProps={{
@@ -144,6 +157,36 @@ const InputSection = ({
           }
         }}
       />
+      
+      {/* Sugestões de correção */}
+      {suggestions.length > 0 && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="caption" sx={{ 
+            color: '#FFD166',
+            fontWeight: 600,
+            display: 'block',
+            mb: 1
+          }}>
+            💡 Sugestões:
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            {suggestions.map((suggestion, index) => (
+              <Chip
+                key={index}
+                label={suggestion}
+                size="small"
+                sx={{ 
+                  background: 'rgba(255, 209, 102, 0.1)',
+                  color: '#FFD166',
+                  border: '1px solid rgba(255, 209, 102, 0.3)',
+                  fontSize: '0.7rem',
+                  height: 24
+                }}
+              />
+            ))}
+          </Box>
+        </Box>
+      )}
       
       {/* Campos de limite e direção */}
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 4 }}>

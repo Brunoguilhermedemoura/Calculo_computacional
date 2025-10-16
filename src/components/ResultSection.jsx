@@ -21,8 +21,25 @@ import {
 } from '@mui/icons-material';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
+import StrategyIndicator from './StrategyIndicator.jsx';
+import StepByStep from './StepByStep.jsx';
 
-const ResultSection = ({ result, steps, tips, isCalculating }) => {
+const ResultSection = ({ 
+  result, 
+  steps, 
+  tips, 
+  strategy,
+  form,
+  formInfo,
+  strategyInfo,
+  isCalculating,
+  showStrategyDetails,
+  showStepDetails,
+  currentStep,
+  onToggleStrategyDetails,
+  onToggleStepDetails,
+  onStepClick
+}) => {
   const getResultIcon = () => {
     if (isCalculating) return <Info color="info" />;
     if (result === 'Erro') return <Error color="error" />;
@@ -139,66 +156,29 @@ const ResultSection = ({ result, steps, tips, isCalculating }) => {
         )}
       </Paper>
 
-      {/* Passos do Cálculo */}
-      {steps.length > 0 && (
-        <Paper elevation={0} sx={{ 
-          p: 4, 
-          flex: '1', 
-          overflow: 'auto',
-          background: 'rgba(30, 30, 47, 0.8)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          borderRadius: 16,
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-        }}>
-          <Typography variant="h6" gutterBottom color="primary" sx={{ fontWeight: 600 }}>
-            🔢 Passos / Álgebra Aplicada
-          </Typography>
-          
-          <List dense>
-            {steps.map((step, index) => (
-              <ListItem key={index} sx={{ py: 0.5 }}>
-                <ListItemText
-                  primary={
-                    <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                      {step}
-                    </Typography>
-                  }
-                />
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
+      {/* Indicador de Estratégia */}
+      {(strategy || form) && (
+        <StrategyIndicator
+          strategy={strategy}
+          form={form}
+          formInfo={formInfo}
+          strategyInfo={strategyInfo}
+          isCalculating={isCalculating}
+          expanded={showStrategyDetails}
+          onToggleExpanded={onToggleStrategyDetails}
+        />
       )}
 
-      {/* Dicas Técnicas */}
-      {tips.length > 0 && (
-        <Paper elevation={0} sx={{ 
-          p: 4, 
-          flex: '0 0 auto',
-          background: 'rgba(30, 30, 47, 0.8)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          borderRadius: 16,
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-        }}>
-          <Typography variant="h6" gutterBottom color="primary" sx={{ fontWeight: 600 }}>
-            💡 Dicas de Técnica
-          </Typography>
-          
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {tips.map((tip, index) => (
-              <Chip
-                key={index}
-                label={tip}
-                color="info"
-                variant="outlined"
-                size="small"
-                sx={{ mb: 1 }}
-              />
-            ))}
-          </Box>
-        </Paper>
+      {/* Passos Detalhados */}
+      {steps.length > 0 && (
+        <StepByStep
+          steps={steps}
+          tips={tips}
+          strategy={strategy}
+          form={form}
+          isCalculating={isCalculating}
+          onStepClick={onStepClick}
+        />
       )}
 
       {/* Mensagem quando não há resultados */}

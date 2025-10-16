@@ -20,10 +20,11 @@ import {
   Box,
   Chip
 } from '@mui/material';
-import { getExamples } from '../services/limitsEngine.js';
+import { getAdvancedExamples } from '../services/advancedLimitsEngine.js';
 
 const ExamplesModal = ({ open, onClose, onLoadExample }) => {
-  const examples = getExamples();
+  const examplesData = getAdvancedExamples();
+  const examples = examplesData.flatMap(category => category.examples);
 
   const handleLoadExample = (example) => {
     onLoadExample(example);

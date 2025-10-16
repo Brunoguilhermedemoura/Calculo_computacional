@@ -16,7 +16,7 @@ import {
   Refresh,
   Info
 } from '@mui/icons-material';
-import { useLimits } from '../hooks/useLimits.js';
+import { useAdvancedLimits } from '../hooks/useAdvancedLimits.js';
 import { create, all } from 'mathjs';
 import InputSection from './InputSection.jsx';
 import ResultSection from './ResultSection.jsx';
@@ -42,7 +42,20 @@ const Calculator = () => {
     result,
     steps,
     tips,
+    strategy,
+    form,
+    formInfo,
+    strategyInfo,
     isCalculating,
+    
+    // Estados de interface
+    showStrategyDetails,
+    showStepDetails,
+    currentStep,
+    
+    // Estados de validação
+    validation,
+    suggestions,
     
     // Estados de modais
     showExamples,
@@ -51,12 +64,23 @@ const Calculator = () => {
     setShowHelp,
     showGraph,
     setShowGraph,
+    showSyntaxTips,
+    setShowSyntaxTips,
     
-    // Funções
+    // Funções principais
     handleCalculate,
     loadExample,
-    resetCalculator
-  } = useLimits();
+    resetCalculator,
+    
+    // Funções de interface
+    toggleStrategyDetails,
+    toggleStepDetails,
+    handleStepClick,
+    
+    // Funções utilitárias
+    getExamples,
+    getStats
+  } = useAdvancedLimits();
 
   const handleExamples = () => {
     setShowExamples(true);
@@ -197,6 +221,8 @@ const Calculator = () => {
               onHelp={handleHelp}
               onGraph={handleGraph}
               isCalculating={isCalculating}
+              validation={validation}
+              suggestions={suggestions}
             />
           </Box>
 
@@ -212,7 +238,17 @@ const Calculator = () => {
               result={result}
               steps={steps}
               tips={tips}
+              strategy={strategy}
+              form={form}
+              formInfo={formInfo}
+              strategyInfo={strategyInfo}
               isCalculating={isCalculating}
+              showStrategyDetails={showStrategyDetails}
+              showStepDetails={showStepDetails}
+              currentStep={currentStep}
+              onToggleStrategyDetails={toggleStrategyDetails}
+              onToggleStepDetails={toggleStepDetails}
+              onStepClick={handleStepClick}
             />
           </Box>
 
