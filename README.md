@@ -2,7 +2,7 @@
 
 Uma calculadora de limites matemáticos desenvolvida em React, migrada do sistema Python original. Permite calcular limites de funções com passos detalhados, visualização gráfica e suporte à notação matemática brasileira.
 
-## 🚀 Funcionalidades
+## Funcionalidades
 
 - **Cálculo de Limites**: Suporte a todas as formas indeterminadas (0/0, ∞/∞, etc.)
 - **Notação Brasileira**: Aceita sen, tg, ln, vírgula decimal (convertida automaticamente)
@@ -12,7 +12,7 @@ Uma calculadora de limites matemáticos desenvolvida em React, migrada do sistem
 - **Exemplos Prontos**: Biblioteca de exemplos para prática
 - **Ajuda de Sintaxe**: Guia completo de como digitar expressões
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 - **React 18** - Framework principal
 - **Material-UI** - Componentes de interface
@@ -21,7 +21,7 @@ Uma calculadora de limites matemáticos desenvolvida em React, migrada do sistem
 - **KaTeX** - Renderização de fórmulas matemáticas
 - **Vite** - Build tool
 
-## 📦 Instalação
+## Instalação
 
 1. Clone o repositório:
 
@@ -44,7 +44,7 @@ npm run dev
 
 4. Acesse no navegador: `http://localhost:5173`
 
-## 🎯 Como Usar
+## Como Usar
 
 ### Entrada de Dados
 
@@ -68,7 +68,7 @@ sin(x)/x quando x → 0
 - **Constantes**: `pi`, `E` (euler), `oo` (infinito)
 - **Notação BR**: `sen` → `sin`, `tg` → `tan`, `ln` → `log`
 
-## 🏗️ Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 src/
@@ -90,7 +90,7 @@ src/
 └── App.jsx              # Aplicação principal
 ```
 
-## 🔧 Desenvolvimento
+## Desenvolvimento
 
 ### Scripts Disponíveis
 
@@ -106,7 +106,7 @@ src/
 3. **Novos Serviços**: Adicione em `services/`
 4. **Novos Exemplos**: Atualize `constants.js`
 
-## 🐛 Resolução de Problemas
+## Resolução de Problemas
 
 ### Erro de Cálculo
 
@@ -125,7 +125,7 @@ src/
 - Use `npm run build` para versão otimizada
 - Verifique se todas as dependências estão atualizadas
 
-## 📚 Migração do Python
+## Migração do Python
 
 Este projeto é uma migração completa do sistema Python original:
 
@@ -148,7 +148,7 @@ Este projeto é uma migração completa do sistema Python original:
 - 🆕 TypeScript ready
 - 🆕 PWA ready
 
-## 🤝 Contribuição
+## Contribuição
 
 1. Fork o projeto
 2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
@@ -156,18 +156,11 @@ Este projeto é uma migração completa do sistema Python original:
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
 
-## 📄 Licença
+## Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 
-## 👥 Autores
+## Autores
 
 - **Migração**: Desenvolvido como migração do sistema Python original
 - **Tecnologias**: React + Material-UI + Math.js
-
-## 🙏 Agradecimentos
-
-- Sistema Python original que serviu de base
-- Comunidade React e Material-UI
-- Bibliotecas Math.js e Plotly.js
-- Equipe de desenvolvimento
