@@ -17,7 +17,8 @@ import {
   Info
 } from '@mui/icons-material';
 import { useAdvancedLimits } from '../hooks/useAdvancedLimits.js';
-import { create, all } from 'mathjs';
+import { math } from '../utils/mathConfig.js';
+// Removido: import de teste
 import InputSection from './InputSection.jsx';
 import ResultSection from './ResultSection.jsx';
 import ExamplesModal from './ExamplesModal.jsx';
@@ -28,7 +29,7 @@ import SimpleChart from './SimpleChart.jsx';
 import CustomScrollbar from './CustomScrollbar.jsx';
 
 const Calculator = () => {
-  const math = create(all);
+  // math já importado do mathConfig.js
   
   const {
     // Estados de entrada
@@ -80,7 +81,8 @@ const Calculator = () => {
     
     // Funções utilitárias
     getExamples,
-    getStats
+    getStats,
+    handleAutoCorrect
   } = useAdvancedLimits();
 
   const handleExamples = () => {
@@ -98,6 +100,8 @@ const Calculator = () => {
   const handleReset = () => {
     resetCalculator();
   };
+
+  // Removido: função de teste
 
   return (
     <CustomScrollbar 
@@ -228,6 +232,7 @@ const Calculator = () => {
               isCalculating={isCalculating}
               validation={validation}
               suggestions={suggestions}
+              onAutoCorrect={handleAutoCorrect}
             />
           </Box>
 

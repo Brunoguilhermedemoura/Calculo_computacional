@@ -20,8 +20,13 @@ export const normalizeExpression = (exprStr) => {
   // Converte vírgula decimal para ponto
   expr = expr.replace(/,/g, '.');
 
-  // Converte operadores de potência
+  // Converte operadores de potência (mais robusto)
   expr = expr.replace(/\^/g, '**');
+  
+  // Converte ** para pow() quando o expoente é uma variável
+  // Isso resolve o problema "Value expected" do Math.js
+  expr = expr.replace(/\(([^)]+)\)\*\*([a-zA-Z])/g, 'pow($1, $2)');
+  expr = expr.replace(/([a-zA-Z0-9]+)\*\*([a-zA-Z])/g, 'pow($1, $2)');
 
   // Converte funções trigonométricas
   Object.entries(TRIGONOMETRIC_FUNCTIONS).forEach(([pt, en]) => {
@@ -29,15 +34,20 @@ export const normalizeExpression = (exprStr) => {
     expr = expr.replace(regex, en);
   });
 
-  // Converte constante de Euler (apenas quando não é parte de uma palavra)
-  expr = expr.replace(/\be\b/g, MATH_CONSTANTS.E);
+  // REMOVIDO: Não converter 'e' para 'E' - o Math.js já reconhece 'e' como constante de Euler
+  // expr = expr.replace(/\be\b/g, MATH_CONSTANTS.E);
 
   // Normaliza infinito
   expr = expr.replace(/\boo\b/g, MATH_CONSTANTS.INFINITY);
   expr = expr.replace(/-oo/g, MATH_CONSTANTS.NEGATIVE_INFINITY);
 
+  // Remove espaços extras
+  expr = expr.replace(/\s+/g, ' ').trim();
+
   return expr;
 };
+
+// Removido: função de normalização alternativa - solução integrada na função principal
 
 /**
  * Valida se uma expressão matemática é válida
@@ -50,7 +60,7 @@ export const isValidExpression = (expr) => {
     const normalized = normalizeExpression(expr);
     if (!normalized) return false;
 
-    // Verifica se contém caracteres válidos
+    // Verifica se contém caracteres válidos (regex mais permissiva)
     const validChars = /^[0-9+\-*/.()x\s\w\*\*]+$/;
     return validChars.test(normalized);
   } catch (error) {

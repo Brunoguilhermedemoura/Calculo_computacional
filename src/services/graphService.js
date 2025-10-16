@@ -3,10 +3,10 @@
  * Equivalente à funcionalidade de plotagem do Python
  */
 
-import { create, all } from 'mathjs';
+import { math } from '../utils/mathConfig.js';
 import { normalizeExpression, parseLimitPoint } from './mathParser.js';
 
-const math = create(all);
+// math já importado do mathConfig.js
 
 /**
  * Gera dados para plotagem de gráfico
@@ -26,19 +26,39 @@ export const generateGraphData = (functionStr, limitPointStr) => {
     const limitPoint = parseLimitPoint(limitPointStr);
     console.log('Ponto limite convertido:', limitPoint);
     
-    if (limitPoint === null || Math.abs(limitPoint) === Infinity) {
-      throw new Error('Não é possível plotar em infinito');
+    if (limitPoint === null) {
+      throw new Error('Ponto limite inválido');
+    }
+    
+    // Para limites no infinito, usa um intervalo especial
+    let xMin, xMax, numPoints;
+    
+    if (Math.abs(limitPoint) === Infinity) {
+      // Para infinito, plota em um intervalo grande mostrando o comportamento assintótico
+      if (limitPoint > 0) {
+        // Limite no +infinito: plota de 1 a 100
+        xMin = 1;
+        xMax = 100;
+        numPoints = 2000; // Mais pontos para melhor resolução
+      } else {
+        // Limite no -infinito: plota de -100 a -1
+        xMin = -100;
+        xMax = -1;
+        numPoints = 2000;
+      }
+    } else {
+      // Para pontos finitos, usa o comportamento original
+      const range = 3;
+      xMin = limitPoint - range;
+      xMax = limitPoint + range;
+      numPoints = 1000;
     }
     
     // Compila a expressão
     const expr = math.compile(normalizedExpr);
     console.log('Expressão compilada com sucesso');
     
-    // Define o intervalo de plotagem
-    const range = 3;
-    const xMin = limitPoint - range;
-    const xMax = limitPoint + range;
-    const numPoints = 1000;
+    // Intervalo de plotagem já definido acima
     
     // Gera pontos x
     const x = [];
@@ -72,19 +92,25 @@ export const generateGraphData = (functionStr, limitPointStr) => {
       }
     };
     
-    // Cria o trace da linha vertical no ponto limite
-    const limitTrace = {
-      x: [limitPoint, limitPoint],
-      y: [Math.min(...y.filter(yi => yi !== null)), Math.max(...y.filter(yi => yi !== null))],
-      type: 'scatter',
-      mode: 'lines',
-      name: `x = ${limitPoint}`,
-      line: {
-        color: 'red',
-        width: 2,
-        dash: 'dash'
+    // Cria o trace da linha vertical no ponto limite (apenas para pontos finitos)
+    let limitTrace = null;
+    if (Math.abs(limitPoint) !== Infinity) {
+      const finiteY = y.filter(yi => yi !== null && isFinite(yi));
+      if (finiteY.length > 0) {
+        limitTrace = {
+          x: [limitPoint, limitPoint],
+          y: [Math.min(...finiteY), Math.max(...finiteY)],
+          type: 'scatter',
+          mode: 'lines',
+          name: `x = ${limitPoint}`,
+          line: {
+            color: 'red',
+            width: 2,
+            dash: 'dash'
+          }
+        };
       }
-    };
+    }
     
     // Calcula limites do eixo y
     const finiteY = y.filter(yi => yi !== null && isFinite(yi));
@@ -103,10 +129,15 @@ export const generateGraphData = (functionStr, limitPointStr) => {
       yMax = 10;
     }
     
+    const data = [functionTrace];
+    if (limitTrace) {
+      data.push(limitTrace);
+    }
+    
     const result = {
-      data: [functionTrace, limitTrace],
+      data: data,
       layout: {
-        title: `Gráfico de f(x) = ${functionStr}`,
+        title: `Gráfico de f(x) = ${functionStr}${Math.abs(limitPoint) === Infinity ? ' (comportamento no infinito)' : ''}`,
         xaxis: {
           title: 'x',
           range: [xMin, xMax]
@@ -181,9 +212,7 @@ export const canPlotFunction = (functionStr, limitPointStr) => {
     return { canPlot: false, reason: 'Ponto limite inválido' };
   }
   
-  if (Math.abs(limitPoint) === Infinity) {
-    return { canPlot: false, reason: 'Não é possível plotar em infinito' };
-  }
+  // Agora permitimos plotagem no infinito com comportamento especial
   
   return { canPlot: true, reason: '' };
 };

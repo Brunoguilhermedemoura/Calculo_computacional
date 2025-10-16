@@ -3,7 +3,7 @@
  * Equivalente ao limits_engine.py do sistema Python
  */
 
-import { create, all } from 'mathjs';
+import { math } from '../utils/mathConfig.js';
 import { 
   INDETERMINATE_FORMS, 
   MATH_CONSTANTS,
@@ -15,12 +15,7 @@ import {
   formatResult 
 } from './mathParser.js';
 
-// Configuração do Math.js
-const math = create(all, {
-  // Configurações para suportar notação brasileira
-  number: 'BigNumber',
-  precision: 64
-});
+// math já importado do mathConfig.js com configuração padronizada
 
 /**
  * Detecta a forma do limite ao substituir x = a

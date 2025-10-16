@@ -24,7 +24,8 @@ import {
   PlaylistPlay,
   Refresh,
   Lightbulb,
-  ShowChart
+  ShowChart,
+  AutoFixHigh
 } from '@mui/icons-material';
 import { DIRECTION_OPTIONS } from '../utils/constants.js';
 import SyntaxTipsModal from './SyntaxTipsModal.jsx';
@@ -43,7 +44,8 @@ const InputSection = ({
   isCalculating,
   error,
   validation,
-  suggestions
+  suggestions,
+  onAutoCorrect
 }) => {
   const [showSyntaxTips, setShowSyntaxTips] = React.useState(false);
   return (
@@ -161,14 +163,38 @@ const InputSection = ({
       {/* Sugestões de correção */}
       {suggestions.length > 0 && (
         <Box sx={{ mb: 2 }}>
-          <Typography variant="caption" sx={{ 
-            color: '#FFD166',
-            fontWeight: 600,
-            display: 'block',
-            mb: 1
-          }}>
-            💡 Sugestões:
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+            <Typography variant="caption" sx={{ 
+              color: '#FFD166',
+              fontWeight: 600
+            }}>
+              💡 Sugestões:
+            </Typography>
+            {onAutoCorrect && (
+              <Button
+                startIcon={<AutoFixHigh />}
+                onClick={onAutoCorrect}
+                variant="outlined"
+                size="small"
+                disabled={validation.valid}
+                sx={{ 
+                  fontSize: '0.7rem',
+                  py: 0.5,
+                  px: 1,
+                  minWidth: 'auto',
+                  height: 28,
+                  border: '1px solid rgba(255, 209, 102, 0.3)',
+                  color: '#FFD166',
+                  '&:hover': {
+                    border: '1px solid rgba(255, 209, 102, 0.6)',
+                    background: 'rgba(255, 209, 102, 0.1)'
+                  }
+                }}
+              >
+                Auto-corrigir
+              </Button>
+            )}
+          </Box>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
             {suggestions.map((suggestion, index) => (
               <Chip

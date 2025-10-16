@@ -3,16 +3,13 @@
  * Implementa o esquema completo da imagem com todas as estratégias
  */
 
-import { create, all } from 'mathjs';
+import { math } from '../utils/mathConfig.js';
 import { detectLimitForm, generateFormSpecificTips, INDETERMINATE_FORMS } from '../utils/limitDetection.js';
 import { detectStrategy, applyStrategy, LIMIT_STRATEGIES } from './limitStrategies.js';
-import { detectFundamentalLimit, applyFundamentalLimit } from './fundamentalLimits.js';
+// import { detectFundamentalLimit, applyFundamentalLimit } from './fundamentalLimits.js';
 import { normalizeExpression, parseLimitPoint, formatResult } from './mathParser.js';
 
-const math = create(all, {
-  number: 'BigNumber',
-  precision: 64
-});
+// math já importado do mathConfig.js
 
 /**
  * Calcula limite usando o motor avançado
@@ -21,7 +18,7 @@ const math = create(all, {
  * @param {string} direction - Direção do limite ("ambos", "esquerda", "direita")
  * @returns {Object} {result, steps, tips, strategy, form}
  */
-export const calculateAdvancedLimit = (functionStr, limitPointStr, direction) => {
+export const calculateAdvancedLimit = (functionStr, limitPointStr) => {
   const steps = [];
   const tips = [];
   
@@ -164,27 +161,69 @@ export const validateExpression = (expr) => {
     return { valid: false, errors, warnings };
   }
   
+  // Verifica erros comuns antes de tentar compilar
+  if (expr.includes('^') && !expr.includes('**')) {
+    errors.push('Use "**" em vez de "^" para potências');
+    return { valid: false, errors, warnings };
+  }
+  
+  if (expr.includes(',')) {
+    errors.push('Use "." em vez de "," para decimais');
+    return { valid: false, errors, warnings };
+  }
+  
+  if (expr.includes('sen(')) {
+    errors.push('Use "sin(" em vez de "sen(" para seno');
+    return { valid: false, errors, warnings };
+  }
+  
+  if (expr.includes('tg(')) {
+    errors.push('Use "tan(" em vez de "tg(" para tangente');
+    return { valid: false, errors, warnings };
+  }
+  
+  if (expr.includes('ln(')) {
+    errors.push('Use "log(" em vez de "ln(" para logaritmo natural');
+    return { valid: false, errors, warnings };
+  }
+  
   try {
-    // Tenta compilar a expressão
+    // Normaliza a expressão
     const normalized = normalizeExpression(expr);
-    const compiled = math.compile(normalized);
     
-    // Testa com alguns valores
-    const testValues = [0, 1, -1, 2, -2];
-    for (const val of testValues) {
-      try {
-        compiled.evaluate({ x: val });
-      } catch (e) {
-        warnings.push(`Expressão pode ser indefinida para x = ${val}`);
-      }
-    }
+    // Tenta compilar
+    math.compile(normalized);
     
+    // Se chegou até aqui, a sintaxe está correta
     return { valid: true, errors, warnings };
     
   } catch (error) {
+    // Se falhar, mostra o erro específico
     errors.push(`Erro de sintaxe: ${error.message}`);
     return { valid: false, errors, warnings };
   }
+};
+
+/**
+ * Auto-corrige expressões com erros comuns
+ * @param {string} expr - Expressão a ser corrigida
+ * @returns {string} Expressão corrigida
+ */
+export const autoCorrectExpression = (expr) => {
+  if (!expr) return expr;
+  
+  let corrected = expr;
+  
+  // Auto-correções comuns
+  corrected = corrected.replace(/\^/g, '**'); // ^ para **
+  corrected = corrected.replace(/,/g, '.');   // , para .
+  corrected = corrected.replace(/sen\(/g, 'sin('); // sen para sin
+  corrected = corrected.replace(/tg\(/g, 'tan(');  // tg para tan
+  corrected = corrected.replace(/ln\(/g, 'log(');  // ln para log
+  corrected = corrected.replace(/infinity/g, 'oo'); // infinity para oo
+  corrected = corrected.replace(/-infinity/g, '-oo'); // -infinity para -oo
+  
+  return corrected;
 };
 
 /**
@@ -416,11 +455,12 @@ export const getAdvancedExamples = () => {
 export const getSystemStats = () => {
   return {
     strategies: Object.keys(LIMIT_STRATEGIES).length,
-    fundamentalLimits: Object.keys(FUNDAMENTAL_LIMITS.TRIGONOMETRIC).length + 
-                       Object.keys(FUNDAMENTAL_LIMITS.EXPONENTIAL).length,
+    fundamentalLimits: 0, // Desabilitado temporariamente
     indeterminateForms: Object.keys(INDETERMINATE_FORMS).length,
     examples: getAdvancedExamples().reduce((total, category) => total + category.examples.length, 0),
     version: '2.0.0',
     lastUpdated: new Date().toISOString()
   };
 };
+
+// Removido: função de teste - solução integrada na normalização principal

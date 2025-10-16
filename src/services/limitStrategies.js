@@ -3,10 +3,10 @@
  * Implementa o esquema de programação da imagem
  */
 
-import { create, all } from 'mathjs';
+import { math } from '../utils/mathConfig.js';
 import { detectFundamentalLimit, applyFundamentalLimit } from './fundamentalLimits.js';
 
-const math = create(all);
+// math já importado do mathConfig.js
 
 /**
  * Estratégias de cálculo de limites

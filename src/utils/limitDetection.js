@@ -3,9 +3,7 @@
  * Implementa o esquema completo da imagem
  */
 
-import { create, all } from 'mathjs';
-
-const math = create(all);
+import { math } from './mathConfig.js';
 
 /**
  * Tipos de formas indeterminadas

@@ -8,6 +8,7 @@ import {
   calculateDetailedLimit,
   validateExpression,
   suggestCorrections,
+  autoCorrectExpression,
   getAdvancedExamples,
   getSystemStats
 } from '../services/advancedLimitsEngine.js';
@@ -54,12 +55,9 @@ export const useAdvancedLimits = () => {
       const validationResult = validateExpression(functionValue);
       setValidation(validationResult);
       
-      if (!validationResult.valid) {
-        const corrections = suggestCorrections(functionValue);
-        setSuggestions(corrections);
-      } else {
-        setSuggestions([]);
-      }
+      // Sempre mostra sugestões para melhorar a expressão
+      const corrections = suggestCorrections(functionValue);
+      setSuggestions(corrections);
     } else {
       setValidation({ valid: true, errors: [], warnings: [] });
       setSuggestions([]);
@@ -211,6 +209,12 @@ export const useAdvancedLimits = () => {
     return suggestCorrections(expr);
   }, []);
 
+  // Função para auto-corrigir expressão
+  const handleAutoCorrect = useCallback(() => {
+    const corrected = autoCorrectExpression(functionValue);
+    setFunctionValue(corrected);
+  }, [functionValue]);
+
   // Cleanup ao desmontar
   useEffect(() => {
     return () => {
@@ -277,6 +281,7 @@ export const useAdvancedLimits = () => {
     getExamples,
     getStats,
     validateExpressionManually,
-    getCorrections
+    getCorrections,
+    handleAutoCorrect
   };
 };

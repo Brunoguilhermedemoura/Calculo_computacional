@@ -4,7 +4,7 @@
 
 export const MATH_CONSTANTS = {
   PI: 'pi',
-  E: 'E',
+  E: 'e',  // Mudado de 'E' para 'e' (minúsculo) - Math.js reconhece 'e' como constante de Euler
   INFINITY: 'oo',
   NEGATIVE_INFINITY: '-oo'
 };
