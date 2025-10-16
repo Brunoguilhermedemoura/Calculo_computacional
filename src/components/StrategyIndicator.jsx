@@ -21,6 +21,7 @@ import {
   Info,
   Lightbulb
 } from '@mui/icons-material';
+import CustomScrollbar from './CustomScrollbar.jsx';
 
 const StrategyIndicator = ({ 
   strategy, 
@@ -230,10 +231,15 @@ const StrategyIndicator = ({
 
       {/* Detalhes expandidos */}
       <Collapse in={expanded}>
-        <Box sx={{ mt: 2 }}>
+        <CustomScrollbar 
+          maxHeight="400px" 
+          variant="dark" 
+          width="8px"
+          sx={{ mt: 2 }}
+        >
           {/* Informações da forma */}
           {formInfo && (
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 3, pr: 1 }}>
               <Typography variant="subtitle2" sx={{ 
                 color: '#6C63FF',
                 fontWeight: 600,
@@ -250,11 +256,12 @@ const StrategyIndicator = ({
               
               {formInfo.steps && formInfo.steps.length > 0 && (
                 <Box sx={{ mt: 1 }}>
-                  {formInfo.steps.slice(0, 3).map((step, index) => (
+                  {formInfo.steps.map((step, index) => (
                     <Typography key={index} variant="caption" sx={{ 
                       color: '#8B8B9E',
                       display: 'block',
-                      fontStyle: 'italic'
+                      fontStyle: 'italic',
+                      mb: 0.5
                     }}>
                       • {step}
                     </Typography>
@@ -266,7 +273,7 @@ const StrategyIndicator = ({
 
           {/* Informações da estratégia */}
           {strategyInfo && (
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 3, pr: 1 }}>
               <Typography variant="subtitle2" sx={{ 
                 color: '#6C63FF',
                 fontWeight: 600,
@@ -277,11 +284,12 @@ const StrategyIndicator = ({
               
               {strategyInfo.steps && strategyInfo.steps.length > 0 && (
                 <Box sx={{ mt: 1 }}>
-                  {strategyInfo.steps.slice(0, 3).map((step, index) => (
+                  {strategyInfo.steps.map((step, index) => (
                     <Typography key={index} variant="caption" sx={{ 
                       color: '#8B8B9E',
                       display: 'block',
-                      fontStyle: 'italic'
+                      fontStyle: 'italic',
+                      mb: 0.5
                     }}>
                       • {step}
                     </Typography>
@@ -293,7 +301,7 @@ const StrategyIndicator = ({
 
           {/* Dicas específicas */}
           {strategyInfo && strategyInfo.tips && strategyInfo.tips.length > 0 && (
-            <Box>
+            <Box sx={{ pr: 1 }}>
               <Typography variant="subtitle2" sx={{ 
                 color: '#FFD166',
                 fontWeight: 600,
@@ -302,7 +310,7 @@ const StrategyIndicator = ({
                 💡 Dicas Específicas
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {strategyInfo.tips.slice(0, 3).map((tip, index) => (
+                {strategyInfo.tips.map((tip, index) => (
                   <Chip
                     key={index}
                     label={tip}
@@ -319,7 +327,7 @@ const StrategyIndicator = ({
               </Box>
             </Box>
           )}
-        </Box>
+        </CustomScrollbar>
       </Collapse>
     </Paper>
   );

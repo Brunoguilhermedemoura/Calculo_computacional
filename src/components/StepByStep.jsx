@@ -32,6 +32,7 @@ import {
 } from '@mui/icons-material';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
+import CustomScrollbar from './CustomScrollbar.jsx';
 
 const StepByStep = ({ 
   steps = [], 
@@ -291,7 +292,11 @@ const StepByStep = ({
       )}
 
       {/* Lista de passos */}
-      <Box sx={{ maxHeight: '600px', overflow: 'auto' }}>
+      <CustomScrollbar 
+        maxHeight="600px" 
+        variant="dark" 
+        width="10px"
+      >
         {steps.map((step, index) => (
           <Accordion
             key={index}
@@ -386,7 +391,7 @@ const StepByStep = ({
             </AccordionDetails>
           </Accordion>
         ))}
-      </Box>
+      </CustomScrollbar>
 
       {/* Dicas */}
       {tips.length > 0 && (

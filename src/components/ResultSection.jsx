@@ -23,6 +23,7 @@ import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 import StrategyIndicator from './StrategyIndicator.jsx';
 import StepByStep from './StepByStep.jsx';
+import CustomScrollbar from './CustomScrollbar.jsx';
 
 const ResultSection = ({ 
   result, 
@@ -68,7 +69,17 @@ const ResultSection = ({
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, height: '100%', overflow: 'auto' }}>
+    <CustomScrollbar 
+      maxHeight="calc(100vh - 200px)" 
+      variant="dark" 
+      width="12px"
+      sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: 3, 
+        height: '100%'
+      }}
+    >
       {/* Resultado Principal */}
       <Paper elevation={0} sx={{ 
         p: 4, 
@@ -291,7 +302,7 @@ const ResultSection = ({
           </Box>
         </Paper>
       )}
-    </Box>
+    </CustomScrollbar>
   );
 };
 

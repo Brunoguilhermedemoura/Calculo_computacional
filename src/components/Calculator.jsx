@@ -25,6 +25,7 @@ import HelpModal from './HelpModal.jsx';
 import GraphModal from './GraphModal.jsx';
 import PlotlyTest from './PlotlyTest.jsx';
 import SimpleChart from './SimpleChart.jsx';
+import CustomScrollbar from './CustomScrollbar.jsx';
 
 const Calculator = () => {
   const math = create(all);
@@ -99,13 +100,17 @@ const Calculator = () => {
   };
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      margin: 0, 
-      padding: 0,
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
+    <CustomScrollbar 
+      maxHeight="100vh" 
+      variant="dark" 
+      width="14px"
+      sx={{ 
+        minHeight: '100vh', 
+        margin: 0, 
+        padding: 0,
+        position: 'relative'
+      }}
+    >
       {/* Header */}
       <AppBar position="static" elevation={0} className="animate-slide-in">
         <Toolbar sx={{ py: 2 }}>
@@ -403,7 +408,7 @@ const Calculator = () => {
           Migrado do sistema Python original
         </Typography>
       </Box>
-    </Box>
+    </CustomScrollbar>
   );
 };
 
