@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste da Aplicação - Calculadora de Limites</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e1e2f;
+            color: white;
+            padding: 20px;
+        }
+        .test-section {
+            background: rgba(30, 30, 47, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .success {
+            color: #00D2FF;
+            background: rgba(0, 210, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .error {
+            color: #FF6B6B;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .info {
+            color: #6C63FF;
+            background: rgba(108, 99, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste da Aplicação - Calculadora de Limites</h1>
+    
+    <div class="test-section">
+        <h2>Status da Aplicação</h2>
+        <div id="status">
+            <div class="info">Verificando status...</div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Aplicação Principal</h2>
+        <p>Se a aplicação estiver funcionando, você verá a interface da calculadora abaixo:</p>
+        <iframe src="http://localhost:5173" id="app-iframe"></iframe>
+    </div>
+    
+    <div class="test-section">
+        <h2>Teste de Funcionalidade</h2>
+        <p>Teste as seguintes expressões na calculadora:</p>
+        <ul>
+            <li><span class="code">x**2-1</span> com ponto <span class="code">1</span> (deve resultar em 2)</li>
+            <li><span class="code">sin(x)/x</span> com ponto <span class="code">0</span> (deve resultar em 1)</li>
+            <li><span class="code">(x**2+3*x)/(x**2-x)</span> com ponto <span class="code">oo</span> (deve resultar em 1)</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>Logs de Debug</h2>
+        <div id="debug-logs">
+            <div class="info">Aguardando logs...</div>
+        </div>
+    </div>
+    
+    <script>
+        console.log('🧪 Iniciando teste da aplicação...');
+        
+        const statusDiv = document.getElementById('status');
+        const debugDiv = document.getElementById('debug-logs');
+        
+        // Verifica se a aplicação está carregando
+        const iframe = document.getElementById('app-iframe');
+        
+        iframe.onload = function() {
+            statusDiv.innerHTML = '<div class="success">✅ Aplicação carregada com sucesso!</div>';
+            debugDiv.innerHTML = '<div class="success">✅ Interface da calculadora está funcionando</div>';
+        };
+        
+        iframe.onerror = function() {
+            statusDiv.innerHTML = '<div class="error">❌ Erro ao carregar a aplicação</div>';
+            debugDiv.innerHTML = '<div class="error">❌ Não foi possível carregar a interface</div>';
+        };
+        
+        // Monitora erros globais
+        window.addEventListener('error', function(e) {
+            debugDiv.innerHTML += '<div class="error">❌ Erro: ' + e.message + '</div>';
+        });
+        
+        // Monitora promises rejeitadas
+        window.addEventListener('unhandledrejection', function(e) {
+            debugDiv.innerHTML += '<div class="error">❌ Promise rejeitada: ' + e.reason + '</div>';
+        });
+        
+        // Verifica se a aplicação está acessível
+        fetch('http://localhost:5173')
+            .then(response => {
+                if (response.ok) {
+                    statusDiv.innerHTML = '<div class="success">✅ Servidor respondendo (Status: ' + response.status + ')</div>';
+                } else {
+                    statusDiv.innerHTML = '<div class="error">❌ Servidor com problema (Status: ' + response.status + ')</div>';
+                }
+            })
+            .catch(error => {
+                statusDiv.innerHTML = '<div class="error">❌ Erro ao conectar: ' + error.message + '</div>';
+            });
+    </script>
+</body>
+</html>

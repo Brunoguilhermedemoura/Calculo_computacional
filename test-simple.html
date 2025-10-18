@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Simples - Calculadora de Limites</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e1e2f;
+            color: white;
+            padding: 20px;
+        }
+        .test-section {
+            background: rgba(30, 30, 47, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .success {
+            color: #00D2FF;
+            background: rgba(0, 210, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .error {
+            color: #FF6B6B;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste Simples - Calculadora de Limites</h1>
+    
+    <div class="test-section">
+        <h2>Teste de Funcionalidade Básica</h2>
+        <div id="test-results">
+            <p>Executando testes...</p>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Teste de Expressão Matemática</h2>
+        <input type="text" id="expression" placeholder="Digite uma expressão (ex: x**2-1)" style="width: 300px; padding: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); color: white; border: 1px solid #6C63FF; border-radius: 8px;">
+        <input type="text" id="limit-point" placeholder="Ponto limite (ex: 1)" style="width: 100px; padding: 10px; margin: 10px 0; background: rgba(0,0,0,0.3); color: white; border: 1px solid #6C63FF; border-radius: 8px;">
+        <button onclick="testExpression()" style="padding: 10px 20px; background: #6C63FF; color: white; border: none; border-radius: 8px; cursor: pointer; margin: 10px 0;">Testar</button>
+        <div id="expression-result"></div>
+    </div>
+    
+    <script type="module">
+        console.log('🧪 Iniciando teste simples...');
+        
+        const testDiv = document.getElementById('test-results');
+        const resultDiv = document.getElementById('expression-result');
+        
+        // Teste 1: Verifica se o módulo está carregando
+        try {
+            testDiv.innerHTML = '<div class="success">✅ Página carregada com sucesso</div>';
+            
+            // Teste 2: Verifica se math.js está disponível
+            if (typeof math !== 'undefined') {
+                testDiv.innerHTML += '<div class="success">✅ Math.js carregado</div>';
+            } else {
+                testDiv.innerHTML += '<div class="error">❌ Math.js não encontrado</div>';
+            }
+            
+            // Teste 3: Verifica se React está disponível
+            if (typeof React !== 'undefined') {
+                testDiv.innerHTML += '<div class="success">✅ React carregado</div>';
+            } else {
+                testDiv.innerHTML += '<div class="error">❌ React não encontrado</div>';
+            }
+            
+        } catch (error) {
+            testDiv.innerHTML += '<div class="error">❌ Erro: ' + error.message + '</div>';
+        }
+        
+        // Função para testar expressão
+        window.testExpression = function() {
+            const expr = document.getElementById('expression').value;
+            const limitPoint = document.getElementById('limit-point').value;
+            
+            if (!expr || !limitPoint) {
+                resultDiv.innerHTML = '<div class="error">❌ Digite uma expressão e um ponto limite</div>';
+                return;
+            }
+            
+            try {
+                // Teste básico com math.js
+                const compiled = math.compile(expr);
+                const result = compiled.evaluate({ x: parseFloat(limitPoint) });
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ Expressão: <span class="code">${expr}</span><br>
+                        ✅ Ponto: <span class="code">${limitPoint}</span><br>
+                        ✅ Resultado: <span class="code">${result}</span>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="error">❌ Erro ao avaliar: ' + error.message + '</div>';
+            }
+        };
+        
+        // Monitora erros globais
+        window.addEventListener('error', function(e) {
+            testDiv.innerHTML += '<div class="error">❌ Erro global: ' + e.message + '</div>';
+        });
+        
+        // Monitora promises rejeitadas
+        window.addEventListener('unhandledrejection', function(e) {
+            testDiv.innerHTML += '<div class="error">❌ Promise rejeitada: ' + e.reason + '</div>';
+        });
+    </script>
+    
+    <!-- Carrega math.js -->
+    <script src="https://unpkg.com/mathjs@11.11.0/lib/browser/math.min.js"></script>
+</body>
+</html>

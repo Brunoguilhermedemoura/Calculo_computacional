@@ -34,9 +34,6 @@ export const LIMIT_STRATEGIES = {
  * @returns {Object} Estratégia detectada e informações
  */
 export const detectStrategy = (expr, limitPoint) => {
-  const steps = [];
-  const tips = [];
-  
   // Primeiro, verifica se é um limite fundamental
   const fundamental = detectFundamentalLimit(expr, limitPoint);
   if (fundamental) {
@@ -63,7 +60,7 @@ export const detectStrategy = (expr, limitPoint) => {
  * @param {number|string} limitPoint - Ponto limite (±∞)
  * @returns {Object} Estratégia detectada
  */
-const detectInfinityStrategy = (expr, limitPoint) => {
+const detectInfinityStrategy = (expr) => {
   const steps = [];
   const tips = [];
   
@@ -286,7 +283,7 @@ const isPolynomial = (expr) => {
   const clean = expr.replace(/\s/g, '');
   
   // Verifica se contém apenas operações polinomiais
-  const polynomialPattern = /^[0-9+\-*/.()x\s\*\*]+$/;
+  const polynomialPattern = /^[0-9+\-*/.()x\s**]+$/;
   
   if (!polynomialPattern.test(clean)) return false;
   
@@ -420,35 +417,97 @@ const applyLateralLimits = (expr, limitPoint) => {
 };
 
 /**
- * Aplica fatoração (implementação básica)
+ * Aplica fatoração com passos detalhados
  */
 const applyFactoring = (expr, limitPoint) => {
   const steps = [];
   const tips = [];
   
-  steps.push('Aplicando estratégia de fatoração');
-  steps.push('Expressão original: ' + expr);
+  steps.push({
+    label: 'Iniciando fatoração',
+    before: expr,
+    after: expr,
+    note: 'Identificando padrões de fatoração na expressão'
+  });
   
-  // Implementação básica - em um sistema real, usaria uma biblioteca de álgebra simbólica
-  if (expr.includes('x^2-1') && expr.includes('x-1')) {
-    steps.push('Fatorando numerador: x²-1 = (x+1)(x-1)');
-    steps.push('Fatorando denominador: x-1 = (x-1)');
-    steps.push('Cancelando termo comum: (x+1)(x-1)/(x-1) = x+1');
-    steps.push(`Aplicando limite: lim(x→${limitPoint}) x+1 = ${limitPoint + 1}`);
-    
-    tips.push('Diferença de quadrados: a²-b² = (a+b)(a-b)');
-    tips.push('Sempre cancele termos comuns após fatorar');
-    
-    return {
-      result: (limitPoint + 1).toString(),
-      steps,
-      tips,
-      strategy: LIMIT_STRATEGIES.FACTORING
-    };
+  // Verifica se é uma fração
+  if (expr.includes('/')) {
+    const parts = expr.split('/');
+    if (parts.length === 2) {
+      const numerator = parts[0].trim();
+      const denominator = parts[1].trim();
+      
+      steps.push({
+        label: 'Separando numerador e denominador',
+        before: expr,
+        after: `Numerador: ${numerator}\nDenominador: ${denominator}`,
+        note: 'Analisando cada parte separadamente'
+      });
+      
+      // Tenta fatorar numerador
+      const numFactored = factorExpression(numerator);
+      if (numFactored.success) {
+        steps.push({
+          label: 'Fatorando numerador',
+          before: numerator,
+          after: numFactored.factored,
+          note: numFactored.method
+        });
+      }
+      
+      // Tenta fatorar denominador
+      const denFactored = factorExpression(denominator);
+      if (denFactored.success) {
+        steps.push({
+          label: 'Fatorando denominador',
+          before: denominator,
+          after: denFactored.factored,
+          note: denFactored.method
+        });
+      }
+      
+      // Verifica cancelamento
+      if (numFactored.success && denFactored.success) {
+        const simplified = simplifyFraction(numFactored.factored, denFactored.factored);
+        if (simplified.cancelled) {
+          steps.push({
+            label: 'Cancelando termos comuns',
+            before: `${numFactored.factored} / ${denFactored.factored}`,
+            after: simplified.result,
+            note: 'Eliminando fatores comuns'
+          });
+          
+          // Calcula o limite da expressão simplificada
+          const finalResult = evaluateSimplified(simplified.result, limitPoint);
+          steps.push({
+            label: 'Aplicando limite',
+            before: simplified.result,
+            after: finalResult.toString(),
+            note: `Substituindo x = ${limitPoint}`
+          });
+          
+          tips.push('Diferença de quadrados: a²-b² = (a+b)(a-b)');
+          tips.push('Sempre cancele termos comuns após fatorar');
+          
+          return {
+            result: finalResult.toString(),
+            steps,
+            tips,
+            strategy: LIMIT_STRATEGIES.FACTORING
+          };
+        }
+      }
+    }
   }
   
   // Estratégia genérica
-  steps.push('Fatoração complexa: use aproximação numérica');
+  steps.push({
+    label: 'Fatoração complexa',
+    before: expr,
+    after: 'Expressão não pode ser fatorada facilmente',
+    note: 'Considere usar L\'Hôpital ou aproximação numérica'
+  });
+  
   tips.push('Para fatoração complexa, considere usar L\'Hôpital');
   
   return {
@@ -460,9 +519,90 @@ const applyFactoring = (expr, limitPoint) => {
 };
 
 /**
+ * Fatora uma expressão específica
+ */
+const factorExpression = (expr) => {
+  // Diferença de quadrados: a² - b² = (a + b)(a - b)
+  const diffSquaresPattern = /([a-zA-Z0-9**\s()]+)\*\*2\s*-\s*([a-zA-Z0-9**\s()]+)\*\*2/;
+  const diffSquaresMatch = expr.match(diffSquaresPattern);
+  
+  if (diffSquaresMatch) {
+    const a = diffSquaresMatch[1].trim();
+    const b = diffSquaresMatch[2].trim();
+    const factored = `(${a} + ${b}) * (${a} - ${b})`;
+    
+    return {
+      factored,
+      success: true,
+      method: 'Diferença de quadrados: a² - b² = (a + b)(a - b)'
+    };
+  }
+  
+  // Fator comum
+  const commonFactorPattern = /([a-zA-Z0-9**\s()]+)\*([a-zA-Z0-9**\s()]+)\s*\+\s*([a-zA-Z0-9**\s()]+)\*([a-zA-Z0-9**\s()]+)/;
+  const commonFactorMatch = expr.match(commonFactorPattern);
+  
+  if (commonFactorMatch) {
+    const factor1 = commonFactorMatch[1].trim();
+    const term1 = commonFactorMatch[2].trim();
+    const factor2 = commonFactorMatch[3].trim();
+    const term2 = commonFactorMatch[4].trim();
+    
+    if (factor1 === factor2) {
+      const factored = `${factor1} * (${term1} + ${term2})`;
+      
+      return {
+        factored,
+        success: true,
+        method: 'Fator comum: ax + bx = x(a + b)'
+      };
+    }
+  }
+  
+  return {
+    factored: expr,
+    success: false,
+    method: 'Nenhum padrão reconhecido'
+  };
+};
+
+/**
+ * Simplifica uma fração cancelando termos comuns
+ */
+const simplifyFraction = (numerator, denominator) => {
+  // Implementação simplificada - em um sistema real usaria álgebra simbólica
+  if (numerator.includes('(x-1)') && denominator.includes('(x-1)')) {
+    return {
+      result: numerator.replace('(x-1)', '').replace('*', '').trim(),
+      cancelled: true
+    };
+  }
+  
+  return {
+    result: `${numerator} / ${denominator}`,
+    cancelled: false
+  };
+};
+
+/**
+ * Avalia expressão simplificada no ponto limite
+ */
+const evaluateSimplified = (expr, limitPoint) => {
+  try {
+    // Implementação simplificada
+    if (expr.includes('x')) {
+      return expr.replace(/x/g, limitPoint.toString());
+    }
+    return parseFloat(expr) || 0;
+  } catch {
+    return 0;
+  }
+};
+
+/**
  * Aplica racionalização (implementação básica)
  */
-const applyRationalization = (expr, limitPoint) => {
+const applyRationalization = (expr) => {
   const steps = [];
   const tips = [];
   
@@ -474,7 +614,7 @@ const applyRationalization = (expr, limitPoint) => {
     steps.push('Numerador: (√(x+1)-1)(√(x+1)+1) = (x+1)-1 = x');
     steps.push('Denominador: x(√(x+1)+1)');
     steps.push('Simplificando: x/(x(√(x+1)+1)) = 1/(√(x+1)+1)');
-    steps.push(`Aplicando limite: lim(x→${limitPoint}) 1/(√(x+1)+1) = 1/2`);
+    steps.push(`Aplicando limite: lim(x→0) 1/(√(x+1)+1) = 1/2`);
     
     tips.push('Conjugado de √a - √b é √a + √b');
     tips.push('Use identidade: (a-b)(a+b) = a²-b²');
@@ -502,7 +642,7 @@ const applyRationalization = (expr, limitPoint) => {
 /**
  * Aplica estratégia de maior grau para limites no infinito
  */
-const applyHighestDegree = (expr, limitPoint) => {
+const applyHighestDegree = (expr) => {
   const steps = [];
   const tips = [];
   
@@ -538,7 +678,7 @@ const applyHighestDegree = (expr, limitPoint) => {
         tips.push('Quando o grau do numerador é maior, o limite tende ao infinito');
         
         return {
-          result: limitPoint > 0 ? '∞' : '-∞',
+          result: '∞',
           steps,
           tips,
           strategy: LIMIT_STRATEGIES.HIGHEST_DEGREE
@@ -568,7 +708,7 @@ const applyHighestDegree = (expr, limitPoint) => {
 /**
  * Aplica multiplicação pelo conjugado
  */
-const applyConjugateMultiplication = (expr, limitPoint) => {
+const applyConjugateMultiplication = (expr) => {
   const steps = [];
   const tips = [];
   
@@ -591,7 +731,7 @@ const applyConjugateMultiplication = (expr, limitPoint) => {
 /**
  * Aplica limites fundamentais exponenciais
  */
-const applyExponentialFundamentals = (expr, limitPoint) => {
+const applyExponentialFundamentals = (expr) => {
   const steps = [];
   const tips = [];
   

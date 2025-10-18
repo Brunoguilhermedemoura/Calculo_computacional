@@ -3,16 +3,17 @@
  * Implementa o esquema completo da imagem com todas as estratégias
  */
 
-import { math } from '../utils/mathConfig.js';
-import { detectLimitForm, generateFormSpecificTips, INDETERMINATE_FORMS } from '../utils/limitDetection.js';
-import { detectStrategy, applyStrategy, LIMIT_STRATEGIES } from './limitStrategies.js';
-// import { detectFundamentalLimit, applyFundamentalLimit } from './fundamentalLimits.js';
-import { normalizeExpression, parseLimitPoint, formatResult } from './mathParser.js';
+import { INDETERMINATE_FORMS } from '../utils/limitDetection.js';
+import { LIMIT_STRATEGIES } from './limitStrategies.js';
+import { 
+  calculateLimit,
+  validateExpressionWithFeedback
+} from './limitsEngineSimple.js';
 
 // math já importado do mathConfig.js
 
 /**
- * Calcula limite usando o motor avançado
+ * Calcula limite usando o motor avançado com todas as funcionalidades implementadas
  * @param {string} functionStr - Expressão da função
  * @param {string} limitPointStr - Ponto para onde x tende
  * @param {string} direction - Direção do limite ("ambos", "esquerda", "direita")
@@ -23,7 +24,7 @@ export const calculateAdvancedLimit = (functionStr, limitPointStr) => {
   const tips = [];
   
   try {
-    // Validação de entrada
+    // Validação de entrada com feedback detalhado
     if (!functionStr || !functionStr.trim()) {
       throw new Error('Digite uma função f(x)');
     }
@@ -32,57 +33,28 @@ export const calculateAdvancedLimit = (functionStr, limitPointStr) => {
       throw new Error('Digite o ponto para onde x tende');
     }
     
-    // Normaliza a expressão
-    const normalizedExpr = normalizeExpression(functionStr);
-    steps.push(`📝 Expressão normalizada: ${normalizedExpr}`);
+    // Usa o motor simplificado
+    const result = calculateLimit(functionStr, limitPointStr, 'ambos');
     
-    // Converte o ponto limite
-    const limitPoint = parseLimitPoint(limitPointStr);
-    if (limitPoint === null) {
-      throw new Error('Ponto limite inválido');
+    // Adiciona os passos do motor simplificado
+    if (result.steps && Array.isArray(result.steps)) {
+      steps.push(...result.steps);
     }
     
-    steps.push(`🎯 Calculando: lim(x→${limitPointStr}) ${normalizedExpr}`);
-    
-    // Detecta a forma do limite
-    const formInfo = detectLimitForm(normalizedExpr, limitPoint);
-    steps.push(`🔍 Forma detectada: ${formInfo.form}`);
-    
-    // Adiciona passos da detecção
-    steps.push(...formInfo.steps);
-    
-    // Gera dicas específicas da forma
-    const formTips = generateFormSpecificTips(formInfo.form, formInfo);
-    tips.push(...formTips);
-    
-    // Detecta estratégia específica
-    const strategyInfo = detectStrategy(normalizedExpr, limitPoint);
-    steps.push(`⚡ Estratégia: ${strategyInfo.strategy}`);
-    
-    // Adiciona passos da estratégia
-    steps.push(...strategyInfo.steps);
-    tips.push(...strategyInfo.tips);
-    
-    // Aplica a estratégia
-    const calculationResult = applyStrategy(normalizedExpr, limitPoint, strategyInfo);
-    
-    // Adiciona passos do cálculo
-    steps.push(...calculationResult.steps);
-    tips.push(...calculationResult.tips);
-    
-    // Formata o resultado final
-    const formattedResult = formatResult(calculationResult.result);
-    steps.push(`✅ Resultado final: ${formattedResult}`);
+    // Adiciona as dicas do motor simplificado
+    if (result.tips && Array.isArray(result.tips)) {
+      tips.push(...result.tips);
+    }
     
     return {
-      result: formattedResult,
+      result: result.result,
       steps,
       tips,
-      strategy: calculationResult.strategy || strategyInfo.strategy,
-      form: formInfo.form,
-      formInfo,
-      strategyInfo,
-      calculationResult
+      strategy: result.strategy || 'substituição_direta',
+      form: result.form || 'numérico',
+      formInfo: { form: result.form || 'numérico' },
+      strategyInfo: { strategy: result.strategy || 'substituição_direta' },
+      calculationResult: result
     };
     
   } catch (error) {
@@ -153,55 +125,7 @@ const calculateComplexity = (stepsCount, tipsCount) => {
  * @returns {Object} Resultado da validação
  */
 export const validateExpression = (expr) => {
-  const errors = [];
-  const warnings = [];
-  
-  if (!expr || !expr.trim()) {
-    errors.push('Expressão não pode estar vazia');
-    return { valid: false, errors, warnings };
-  }
-  
-  // Verifica erros comuns antes de tentar compilar
-  if (expr.includes('^') && !expr.includes('**')) {
-    errors.push('Use "**" em vez de "^" para potências');
-    return { valid: false, errors, warnings };
-  }
-  
-  if (expr.includes(',')) {
-    errors.push('Use "." em vez de "," para decimais');
-    return { valid: false, errors, warnings };
-  }
-  
-  if (expr.includes('sen(')) {
-    errors.push('Use "sin(" em vez de "sen(" para seno');
-    return { valid: false, errors, warnings };
-  }
-  
-  if (expr.includes('tg(')) {
-    errors.push('Use "tan(" em vez de "tg(" para tangente');
-    return { valid: false, errors, warnings };
-  }
-  
-  if (expr.includes('ln(')) {
-    errors.push('Use "log(" em vez de "ln(" para logaritmo natural');
-    return { valid: false, errors, warnings };
-  }
-  
-  try {
-    // Normaliza a expressão
-    const normalized = normalizeExpression(expr);
-    
-    // Tenta compilar
-    math.compile(normalized);
-    
-    // Se chegou até aqui, a sintaxe está correta
-    return { valid: true, errors, warnings };
-    
-  } catch (error) {
-    // Se falhar, mostra o erro específico
-    errors.push(`Erro de sintaxe: ${error.message}`);
-    return { valid: false, errors, warnings };
-  }
+  return validateExpressionWithFeedback(expr);
 };
 
 /**
@@ -232,42 +156,8 @@ export const autoCorrectExpression = (expr) => {
  * @returns {Array<string>} Lista de sugestões
  */
 export const suggestCorrections = (expr) => {
-  const suggestions = [];
-  
-  // Verifica erros comuns
-  if (expr.includes('sen(')) {
-    suggestions.push('Use "sin(" em vez de "sen(" para seno');
-  }
-  
-  if (expr.includes('tg(')) {
-    suggestions.push('Use "tan(" em vez de "tg(" para tangente');
-  }
-  
-  if (expr.includes('ln(')) {
-    suggestions.push('Use "log(" em vez de "ln(" para logaritmo natural');
-  }
-  
-  if (expr.includes('^') && !expr.includes('**')) {
-    suggestions.push('Use "**" em vez de "^" para potências');
-  }
-  
-  if (expr.includes(',')) {
-    suggestions.push('Use "." em vez de "," para decimais');
-  }
-  
-  if (expr.includes('infinity')) {
-    suggestions.push('Use "oo" em vez de "infinity" para infinito');
-  }
-  
-  // Verifica parênteses balanceados
-  const openParens = (expr.match(/\(/g) || []).length;
-  const closeParens = (expr.match(/\)/g) || []).length;
-  
-  if (openParens !== closeParens) {
-    suggestions.push('Verifique se todos os parênteses estão balanceados');
-  }
-  
-  return suggestions;
+  const validation = validateExpression(expr);
+  return [...validation.errors, ...validation.warnings];
 };
 
 /**

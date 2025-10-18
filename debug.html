@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Calculadora de Limites</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e1e2f;
+            color: white;
+            padding: 20px;
+        }
+        .error {
+            color: #FF6B6B;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #00D2FF;
+            background: rgba(0, 210, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug - Calculadora de Limites</h1>
+    
+    <div id="status">
+        <p>Verificando status da aplicação...</p>
+    </div>
+    
+    <div id="errors"></div>
+    
+    <div id="test-results"></div>
+    
+    <script>
+        console.log('🔍 Iniciando debug...');
+        
+        // Verifica se a aplicação está carregando
+        const statusDiv = document.getElementById('status');
+        const errorsDiv = document.getElementById('errors');
+        const testDiv = document.getElementById('test-results');
+        
+        // Testa se o React está funcionando
+        try {
+            // Simula um teste básico
+            statusDiv.innerHTML = '<div class="success">✅ Página carregada com sucesso</div>';
+            
+            // Verifica se há erros no console
+            const originalError = console.error;
+            const errors = [];
+            
+            console.error = function(...args) {
+                errors.push(args.join(' '));
+                originalError.apply(console, args);
+            };
+            
+            // Aguarda um pouco para capturar erros
+            setTimeout(() => {
+                if (errors.length > 0) {
+                    errorsDiv.innerHTML = '<h3>❌ Erros encontrados:</h3>' + 
+                        errors.map(error => `<div class="error">${error}</div>`).join('');
+                } else {
+                    errorsDiv.innerHTML = '<div class="success">✅ Nenhum erro encontrado no console</div>';
+                }
+                
+                // Testa funcionalidades básicas
+                testDiv.innerHTML = '<h3>🧪 Testando funcionalidades:</h3>';
+                
+                // Teste 1: Verifica se math.js está disponível
+                try {
+                    if (typeof math !== 'undefined') {
+                        testDiv.innerHTML += '<div class="success">✅ Math.js carregado</div>';
+                    } else {
+                        testDiv.innerHTML += '<div class="error">❌ Math.js não encontrado</div>';
+                    }
+                } catch (e) {
+                    testDiv.innerHTML += '<div class="error">❌ Erro ao verificar Math.js: ' + e.message + '</div>';
+                }
+                
+                // Teste 2: Verifica se React está funcionando
+                try {
+                    if (typeof React !== 'undefined') {
+                        testDiv.innerHTML += '<div class="success">✅ React carregado</div>';
+                    } else {
+                        testDiv.innerHTML += '<div class="error">❌ React não encontrado</div>';
+                    }
+                } catch (e) {
+                    testDiv.innerHTML += '<div class="error">❌ Erro ao verificar React: ' + e.message + '</div>';
+                }
+                
+            }, 2000);
+            
+        } catch (error) {
+            statusDiv.innerHTML = '<div class="error">❌ Erro ao carregar: ' + error.message + '</div>';
+        }
+        
+        // Monitora erros globais
+        window.addEventListener('error', function(e) {
+            errorsDiv.innerHTML += '<div class="error">❌ Erro global: ' + e.message + ' em ' + e.filename + ':' + e.lineno + '</div>';
+        });
+        
+        // Monitora promises rejeitadas
+        window.addEventListener('unhandledrejection', function(e) {
+            errorsDiv.innerHTML += '<div class="error">❌ Promise rejeitada: ' + e.reason + '</div>';
+        });
+    </script>
+</body>
+</html>

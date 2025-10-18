@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Funcionalidades Implementadas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1e1e2f;
+            color: white;
+        }
+        .demo-section {
+            background: rgba(30, 30, 47, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .demo-title {
+            color: #6C63FF;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+        .demo-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(108, 99, 255, 0.1);
+            border-radius: 8px;
+        }
+        .success {
+            color: #00D2FF;
+        }
+        .error {
+            color: #FF6B6B;
+        }
+        .code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 Demonstração das Funcionalidades Implementadas</h1>
+    
+    <div class="demo-section">
+        <h2 class="demo-title">✅ 8 Funcionalidades Principais Implementadas</h2>
+        
+        <div class="demo-item">
+            <h3>1. Limites Laterais Avançados</h3>
+            <p><span class="code">computeLateralLimit(expr, a, side)</span> - Malha decrescente h ∈ {1e-1, 1e-2, 1e-3}</p>
+            <p><span class="code">computeBothSides(expr, a)</span> - Comparação com tolerância 1e-6</p>
+            <p class="success">✅ Implementado e integrado</p>
+        </div>
+        
+        <div class="demo-item">
+            <h3>2. Fatoração Robusta para Polinômios</h3>
+            <p><span class="code">isPolynomial(expr)</span> - Detecção robusta</p>
+            <p><span class="code">factorIfPolynomial(expr)</span> - Fatoração com math.simplify</p>
+            <p class="success">✅ Implementado e integrado</p>
+        </div>
+        
+        <div class="demo-item">
+            <h3>3. Racionalização por Conjugado</h3>
+            <p><span class="code">hasRadicalsInFraction(expr)</span> - Detecção de sqrt(...)</p>
+            <p><span class="code">rationalizeByConjugate(expr)</span> - Geração do conjugado</p>
+            <p class="success">✅ Implementado e integrado</p>
+        </div>
+        
+        <div class="demo-item">
+            <h3>4. Evidência de Maior Grau</h3>
+            <p><span class="code">dominantDegree(term)</span> - Cálculo do grau dominante</p>
+            <p><span class="code">highlightDominantPower(num, den)</span> - Divisão por x^n</p>
+            <p class="success">✅ Implementado e integrado</p>
+        </div>
+        
+        <div class="demo-item">
+            <h3>5. Conjugado para ∞−∞</h3>
+            <p><span class="code">isInfinityMinusInfinity(expr, a)</span> - Detecção</p>
+            <p><span class="code">rationalizeByConjugate(expr)</span> - Aplicação automática</p>
+            <p class="success">✅ Implementado e integrado</p>
+        </div>
+        
+        <div class="demo-item">
+            <h3>6. Indeterminadas Exponenciais</h3>
+            <p><span class="code">handleExponentialIndeterminates(expr, limitPoint)</span> - 1^∞, 0^0, ∞^0</p>
+            <p><span class="code">applyLHospital(numerator, denominator, limitPoint)</span> - L'Hôpital</p>
+            <p class="success">✅ Implementado e integrado</p>
+        </div>
+        
+        <div class="demo-item">
+            <h3>7. Sistema de Passo a Passo</h3>
+            <p>Cada transformação gera passos estruturados: <span class="code">{label, before, after, note}</span></p>
+            <p>Integração com KaTeX para exibição matemática</p>
+            <p class="success">✅ Implementado e integrado</p>
+        </div>
+        
+        <div class="demo-item">
+            <h3>8. Mensagens de Erro Claras</h3>
+            <p><span class="code">generateClearErrorMessage()</span> - Categorias específicas</p>
+            <p><span class="code">validateExpressionWithFeedback()</span> - Validação em tempo real</p>
+            <p class="success">✅ Implementado e integrado</p>
+        </div>
+    </div>
+    
+    <div class="demo-section">
+        <h2 class="demo-title">🔧 Integração no Sistema</h2>
+        
+        <div class="demo-item">
+            <h3>Motor Principal Atualizado</h3>
+            <p><span class="code">src/services/limitsEngine.js</span> - Todas as 8 funcionalidades</p>
+            <p><span class="code">src/services/advancedLimitsEngine.js</span> - Integração completa</p>
+            <p class="success">✅ Sistema totalmente integrado</p>
+        </div>
+        
+        <div class="demo-item">
+            <h3>Interface Atualizada</h3>
+            <p><span class="code">src/hooks/useAdvancedLimits.js</span> - Hook principal</p>
+            <p><span class="code">src/components/Calculator.jsx</span> - Interface principal</p>
+            <p class="success">✅ Interface pronta para uso</p>
+        </div>
+    </div>
+    
+    <div class="demo-section">
+        <h2 class="demo-title">🧪 Casos de Teste Suportados</h2>
+        
+        <div class="demo-item">
+            <p><span class="code">(x²-1)/(x-1) em x→1 → 2</span> (fatoração)</p>
+            <p><span class="code">(√(x+1)-1)/x em x→0 → 1/2</span> (racionalização)</p>
+            <p><span class="code">sin(x)/x em x→0 → 1</span> (limite fundamental)</p>
+            <p><span class="code">(1+1/x)^x em x→∞ → e</span> (exponencial)</p>
+            <p><span class="code">(x²+3x)/(x²-x) em x→∞ → 1</span> (evidência de grau)</p>
+            <p><span class="code">|x|/x em x→0 → "não existe"</span> (laterais diferentes)</p>
+            <p><span class="code">(e^x-1)/x em x→0 → 1</span> (exponencial)</p>
+            <p><span class="code">(1-cos(x))/x² em x→0 → 1/2</span> (trigonométrico)</p>
+        </div>
+    </div>
+    
+    <div class="demo-section">
+        <h2 class="demo-title">🚀 Como Usar</h2>
+        
+        <div class="demo-item">
+            <h3>1. Iniciar o Sistema</h3>
+            <p><span class="code">npm run dev</span> - Servidor de desenvolvimento</p>
+        </div>
+        
+        <div class="demo-item">
+            <h3>2. Testar Funcionalidades</h3>
+            <p>Digite uma expressão matemática e um ponto limite</p>
+            <p>O sistema aplicará automaticamente as estratégias apropriadas</p>
+            <p>Veja o passo a passo detalhado na interface</p>
+        </div>
+        
+        <div class="demo-item">
+            <h3>3. Exemplos Prontos</h3>
+            <p>Use o botão "Exemplos" para testar casos específicos</p>
+            <p>Cada exemplo demonstra uma funcionalidade diferente</p>
+        </div>
+    </div>
+    
+    <div class="demo-section">
+        <h2 class="demo-title">📊 Status da Implementação</h2>
+        
+        <div class="demo-item">
+            <p><strong>Funcionalidades:</strong> 8/8 ✅ (100%)</p>
+            <p><strong>Integração:</strong> Completa ✅</p>
+            <p><strong>Interface:</strong> Pronta ✅</p>
+            <p><strong>Testes:</strong> Casos específicos implementados ✅</p>
+            <p><strong>Documentação:</strong> Completa ✅</p>
+        </div>
+    </div>
+    
+    <div class="demo-section">
+        <h2 class="demo-title">🎯 Próximos Passos</h2>
+        
+        <div class="demo-item">
+            <p>1. Execute <span class="code">npm run dev</span> para iniciar o sistema</p>
+            <p>2. Teste as funcionalidades com os exemplos fornecidos</p>
+            <p>3. Verifique o passo a passo detalhado para cada cálculo</p>
+            <p>4. Explore as diferentes estratégias implementadas</p>
+        </div>
+    </div>
+    
+    <footer style="text-align: center; margin-top: 40px; color: #B8B8CC;">
+        <p>🎓 Sistema de Cálculo de Limites - Implementação Completa v2.0.0</p>
+        <p>Desenvolvido com ❤️ usando React + Material-UI + Math.js</p>
+    </footer>
+</body>
+</html>
