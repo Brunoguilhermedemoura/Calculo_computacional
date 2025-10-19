@@ -2,7 +2,7 @@
  * Componente de entrada de dados da calculadora
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   Box,
   TextField,
@@ -17,7 +17,9 @@ import {
   Alert,
   Chip,
   Tooltip,
-  InputAdornment
+  InputAdornment,
+  Collapse,
+  IconButton
 } from '@mui/material';
 import {
   Calculate,
@@ -29,11 +31,13 @@ import {
   ShowChart,
   AutoFixHigh,
   Error,
-  CheckCircle
+  CheckCircle,
+  Keyboard
 } from '@mui/icons-material';
 import { DIRECTION_OPTIONS } from '../utils/constants.js';
 import SyntaxTipsModal from './SyntaxTipsModal.jsx';
 import CalculationHistory from './CalculationHistory.jsx';
+import MathKeyboard from './MathKeyboard.jsx';
 import { useRealTimeValidation } from '../hooks/useRealTimeValidation.js';
 
 const InputSection = ({
@@ -54,6 +58,8 @@ const InputSection = ({
   onAutoCorrect
 }) => {
   const [showSyntaxTips, setShowSyntaxTips] = React.useState(false);
+  const [showKeyboard, setShowKeyboard] = React.useState(false);
+  const inputRef = useRef(null);
   const { validation: realTimeValidation, validateExpression } = useRealTimeValidation();
 
   // Validação em tempo real
@@ -65,6 +71,35 @@ const InputSection = ({
     setFunctionValue(calculation.function);
     setLimitPoint(calculation.point);
     setDirection(calculation.direction);
+  };
+
+  // Função para lidar com teclas do teclado virtual
+  const handleKeyPress = (key) => {
+    if (key === 'backspace') {
+      // Remover último caractere
+      setFunctionValue(prev => prev.slice(0, -1));
+      return;
+    }
+
+    // Obter posição do cursor
+    const cursorPosition = inputRef.current?.selectionStart || functionValue.length;
+    
+    // Inserir caractere na posição do cursor
+    const newValue = 
+      functionValue.slice(0, cursorPosition) + 
+      key + 
+      functionValue.slice(cursorPosition);
+    
+    setFunctionValue(newValue);
+
+    // Restaurar posição do cursor após a atualização
+    setTimeout(() => {
+      if (inputRef.current) {
+        const newCursorPosition = cursorPosition + key.length;
+        inputRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
+        inputRef.current.focus();
+      }
+    }, 0);
   };
 
   const getValidationIcon = () => {
@@ -162,6 +197,7 @@ const InputSection = ({
       
       {/* Campo da função com validação em tempo real */}
       <TextField
+        ref={inputRef}
         fullWidth
         label="f(x) ="
         value={functionValue}
@@ -192,6 +228,22 @@ const InputSection = ({
                     {getValidationIcon()}
                   </Box>
                 </Tooltip>
+                <Tooltip title={showKeyboard ? 'Fechar teclado' : 'Abrir teclado matemático'}>
+                  <IconButton
+                    onClick={() => setShowKeyboard(!showKeyboard)}
+                    size="small"
+                    sx={{
+                      color: showKeyboard ? '#6C63FF' : '#B8B8CC',
+                      background: showKeyboard ? 'rgba(108, 99, 255, 0.1)' : 'transparent',
+                      '&:hover': {
+                        color: '#6C63FF',
+                        background: 'rgba(108, 99, 255, 0.1)'
+                      }
+                    }}
+                  >
+                    <Keyboard />
+                  </IconButton>
+                </Tooltip>
                 <CalculationHistory onLoadCalculation={handleLoadFromHistory} />
               </Box>
             </InputAdornment>
@@ -210,6 +262,14 @@ const InputSection = ({
           }
         }}
       />
+
+      {/* Teclado matemático com animação */}
+      <Collapse in={showKeyboard} timeout="auto" unmountOnExit>
+        <MathKeyboard 
+          onKeyPress={handleKeyPress}
+          onClose={() => setShowKeyboard(false)}
+        />
+      </Collapse>
       
       {/* Sugestões de correção */}
       {suggestions.length > 0 && (
@@ -420,7 +480,7 @@ const InputSection = ({
               transform: 'translateY(-1px)'
             }
           }}
-          disabled={!functionValue.trim() || !limitPoint.trim()}
+          disabled={!functionValue.trim() || !limitPoint.trim() || !realTimeValidation.valid}
         >
           Gráfico
         </Button>

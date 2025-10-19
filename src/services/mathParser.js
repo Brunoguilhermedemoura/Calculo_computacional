@@ -23,10 +23,10 @@ export const normalizeExpression = (exprStr) => {
   // Converte operadores de potência (mais robusto)
   expr = expr.replace(/\^/g, '**');
   
-  // Converte ** para pow() quando o expoente é uma variável
+  // Converte ** para pow() quando o expoente é uma variável OU número
   // Isso resolve o problema "Value expected" do Math.js
-  expr = expr.replace(/\(([^)]+)\)\*\*([a-zA-Z])/g, 'pow($1, $2)');
-  expr = expr.replace(/([a-zA-Z0-9]+)\*\*([a-zA-Z])/g, 'pow($1, $2)');
+  expr = expr.replace(/\(([^)]+)\)\*\*([a-zA-Z0-9]+)/g, 'pow($1, $2)');
+  expr = expr.replace(/([a-zA-Z0-9]+)\*\*([a-zA-Z0-9]+)/g, 'pow($1, $2)');
 
   // Converte funções trigonométricas
   Object.entries(TRIGONOMETRIC_FUNCTIONS).forEach(([pt, en]) => {

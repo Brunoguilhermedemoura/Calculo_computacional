@@ -2,7 +2,7 @@
  * Hook para validação em tempo real de expressões matemáticas
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { math } from '../utils/mathConfig.js';
 import { normalizeExpression } from '../services/mathParser.js';
 
@@ -23,10 +23,10 @@ export const useRealTimeValidation = () => {
     setValidation(prev => ({ ...prev, isValidating: true }));
 
     try {
-      // Normaliza a expressão
+      // Normaliza a expressão PRIMEIRO
       const normalized = normalizeExpression(expression);
       
-      // Tenta compilar a expressão
+      // Tenta compilar a expressão normalizada
       const compiled = math.compile(normalized);
       
       // Testa com alguns valores para verificar se é válida
@@ -51,25 +51,26 @@ export const useRealTimeValidation = () => {
         }
       }
 
-      // Verifica padrões comuns de erro
+      // Verifica padrões comuns de erro (apenas como avisos, não erros)
       if (expression.includes('^') && !expression.includes('**')) {
-        warnings.push('Use "**" em vez de "^" para potências');
+        warnings.push('Use "**" em vez de "^" para potências (será convertido automaticamente)');
+        // Não marca como inválido se pode ser convertido automaticamente
       }
 
       if (expression.includes(',')) {
-        warnings.push('Use "." em vez de "," para decimais');
+        warnings.push('Use "." em vez de "," para decimais (será convertido automaticamente)');
       }
 
       if (expression.includes('sen(')) {
-        warnings.push('Use "sin(" em vez de "sen(" para seno');
+        warnings.push('Use "sin(" em vez de "sen(" para seno (será convertido automaticamente)');
       }
 
       if (expression.includes('tg(')) {
-        warnings.push('Use "tan(" em vez de "tg(" para tangente');
+        warnings.push('Use "tan(" em vez de "tg(" para tangente (será convertido automaticamente)');
       }
 
       if (expression.includes('ln(')) {
-        warnings.push('Use "log(" em vez de "ln(" para logaritmo natural');
+        warnings.push('Use "log(" em vez de "ln(" para logaritmo natural (será convertido automaticamente)');
       }
 
       // Verifica parênteses balanceados
@@ -82,12 +83,8 @@ export const useRealTimeValidation = () => {
       }
 
       // Verifica se há operadores duplicados
-      if (expression.includes('++') || expression.includes('--') || expression.includes('**')) {
-        if (expression.includes('**')) {
-          // ** é válido para potências
-        } else {
-          warnings.push('Operadores duplicados detectados');
-        }
+      if (expression.includes('++') || expression.includes('--')) {
+        warnings.push('Operadores duplicados detectados');
       }
 
       // Verifica divisão por zero potencial
@@ -102,7 +99,7 @@ export const useRealTimeValidation = () => {
         isValidating: false
       });
 
-    } catch (error) {
+    } catch {
       setValidation({
         valid: false,
         errors: ['Expressão inválida'],
