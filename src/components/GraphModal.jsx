@@ -12,18 +12,31 @@ import {
   Typography,
   Box,
   Alert,
-  CircularProgress
+  CircularProgress,
+  FormControlLabel,
+  Switch,
+  Slider,
+  Chip,
+  Stack
 } from '@mui/material';
 import Plot from 'react-plotly.js';
 import Plotly from 'plotly.js-dist-min';
 import { generateGraphData, canPlotFunction } from '../services/graphService.js';
+import { generateEnhancedGraphData } from '../services/enhancedGraphService.js';
+import { calculateDerivative } from '../services/derivativesEngine.js';
 import SimpleChart from './SimpleChart.jsx';
 
-const GraphModal = ({ open, onClose, functionStr, limitPoint }) => {
+const GraphModal = ({ open, onClose, functionStr, limitPoint, limitValue = null }) => {
   const [graphData, setGraphData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [useChartJS, setUseChartJS] = useState(false);
+  
+  // Novos estados para controles interativos
+  const [showDerivative, setShowDerivative] = useState(false);
+  const [useLogScale, setUseLogScale] = useState(false);
+  const [xRange, setXRange] = useState([null, null]);
+  const [rangeSlider, setRangeSlider] = useState(4);
 
   const generateGraph = useCallback(async () => {
     setLoading(true);
@@ -42,9 +55,26 @@ const GraphModal = ({ open, onClose, functionStr, limitPoint }) => {
         return;
       }
       
-      // Gera os dados do gráfico
-      console.log('Gerando dados do gráfico...');
-      const data = generateGraphData(functionStr, limitPoint);
+      // Calcula o intervalo baseado no range slider
+      let currentXRange = xRange;
+      if (currentXRange[0] === null || currentXRange[1] === null) {
+        const limitPointNum = parseFloat(limitPoint);
+        if (!isNaN(limitPointNum) && isFinite(limitPointNum)) {
+          currentXRange = [
+            limitPointNum - rangeSlider,
+            limitPointNum + rangeSlider
+          ];
+        }
+      }
+      
+      // Gera os dados do gráfico aprimorado
+      console.log('Gerando dados do gráfico aprimorado...');
+      const data = generateEnhancedGraphData(functionStr, limitPoint, {
+        showDerivative,
+        useLogScale,
+        xRange: currentXRange,
+        limitValue
+      });
       console.log('Dados gerados:', data);
       setGraphData(data);
       
@@ -54,7 +84,7 @@ const GraphModal = ({ open, onClose, functionStr, limitPoint }) => {
     } finally {
       setLoading(false);
     }
-  }, [functionStr, limitPoint]);
+  }, [functionStr, limitPoint, showDerivative, useLogScale, xRange, rangeSlider, limitValue]);
 
   useEffect(() => {
     if (open) {
@@ -83,19 +113,21 @@ const GraphModal = ({ open, onClose, functionStr, limitPoint }) => {
           layout: {
             title: {
               text: 'Gráfico de Teste - Plotly Funcionando',
-              font: { color: '#FFFFFF' }
+              font: { color: '#B8B8CC', family: 'Inter' }
             },
             xaxis: { 
               title: 'x',
-              color: '#B8B8CC'
+              color: '#B8B8CC',
+              tickfont: { color: '#B8B8CC', family: 'Inter' }
             },
             yaxis: { 
               title: 'y',
-              color: '#B8B8CC'
+              color: '#B8B8CC',
+              tickfont: { color: '#B8B8CC', family: 'Inter' }
             },
             plot_bgcolor: 'rgba(0,0,0,0)',
             paper_bgcolor: 'rgba(0,0,0,0)',
-            font: { color: '#FFFFFF' }
+            font: { family: 'Inter', color: '#B8B8CC' }
           },
           config: {
             responsive: true,
@@ -126,7 +158,26 @@ const GraphModal = ({ open, onClose, functionStr, limitPoint }) => {
   const handleClose = () => {
     setGraphData(null);
     setError('');
+    setShowDerivative(false);
+    setUseLogScale(false);
+    setXRange([null, null]);
+    setRangeSlider(4);
     onClose();
+  };
+
+  const handleRangeSliderChange = (event, newValue) => {
+    setRangeSlider(newValue);
+    setXRange([null, null]); // Reset custom range
+  };
+
+  const parseLimitPoint = (limitPointStr) => {
+    if (limitPointStr === 'inf' || limitPointStr === '+inf' || limitPointStr === 'infinity') {
+      return Infinity;
+    }
+    if (limitPointStr === '-inf' || limitPointStr === '-infinity') {
+      return -Infinity;
+    }
+    return parseFloat(limitPointStr);
   };
 
   return (
@@ -179,6 +230,82 @@ const GraphModal = ({ open, onClose, functionStr, limitPoint }) => {
       </DialogTitle>
       
       <DialogContent>
+        {/* Controles Interativos */}
+        <Box sx={{ 
+          mb: 3, 
+          p: 3, 
+          background: 'rgba(108, 99, 255, 0.1)',
+          borderRadius: 12,
+          border: '1px solid rgba(108, 99, 255, 0.3)',
+          backdropFilter: 'blur(10px)'
+        }}>
+          <Typography variant="h6" sx={{ color: '#6C63FF', mb: 2 }}>
+            Controles de Visualização
+          </Typography>
+          
+          <Stack direction="row" spacing={3} alignItems="center" flexWrap="wrap">
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showDerivative}
+                  onChange={(e) => setShowDerivative(e.target.checked)}
+                  sx={{
+                    '& .MuiSwitch-switchBase.Mui-checked': {
+                      color: '#00D2FF',
+                    },
+                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                      backgroundColor: '#00D2FF',
+                    },
+                  }}
+                />
+              }
+              label="Exibir Derivada (f'(x))"
+              sx={{ color: '#B8B8CC' }}
+            />
+            
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={useLogScale}
+                  onChange={(e) => setUseLogScale(e.target.checked)}
+                  sx={{
+                    '& .MuiSwitch-switchBase.Mui-checked': {
+                      color: '#FFD166',
+                    },
+                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                      backgroundColor: '#FFD166',
+                    },
+                  }}
+                />
+              }
+              label="Escala Logarítmica (Y)"
+              sx={{ color: '#B8B8CC' }}
+            />
+            
+            <Box sx={{ minWidth: 200 }}>
+              <Typography variant="body2" sx={{ color: '#B8B8CC', mb: 1 }}>
+                Intervalo do Eixo X: ±{rangeSlider}
+              </Typography>
+              <Slider
+                value={rangeSlider}
+                onChange={handleRangeSliderChange}
+                min={1}
+                max={20}
+                step={0.5}
+                sx={{
+                  color: '#6C63FF',
+                  '& .MuiSlider-thumb': {
+                    backgroundColor: '#6C63FF',
+                  },
+                  '& .MuiSlider-track': {
+                    backgroundColor: '#6C63FF',
+                  },
+                }}
+              />
+            </Box>
+          </Stack>
+        </Box>
+
         <Box sx={{ height: '500px', width: '100%' }}>
           {loading && (
             <Box 
@@ -258,8 +385,10 @@ const GraphModal = ({ open, onClose, functionStr, limitPoint }) => {
               color: '#B8B8CC',
               fontSize: '0.9rem'
             }}>
-              <strong>Instruções:</strong> Use o mouse para zoom e pan. A linha vermelha tracejada 
-              indica o ponto limite. A linha azul representa a função f(x).
+              <strong>Instruções:</strong> Use o mouse para zoom e pan. A linha vertical tracejada 
+              indica o ponto limite. A linha roxa representa a função f(x). 
+              {showDerivative && " A linha tracejada azul representa a derivada f'(x)."}
+              {useLogScale && " O eixo Y está em escala logarítmica."}
             </Typography>
           </Box>
         )}

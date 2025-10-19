@@ -9,10 +9,18 @@ import { normalizeExpression, parseLimitPoint } from './mathParser.js';
  * Gera dados aprimorados para plotagem com detecção de descontinuidades
  * @param {string} functionStr - Expressão da função
  * @param {string} limitPointStr - Ponto limite
+ * @param {Object} options - Opções adicionais para o gráfico
  * @returns {Object} Dados do gráfico aprimorados
  */
-export const generateEnhancedGraphData = (functionStr, limitPointStr) => {
+export const generateEnhancedGraphData = (functionStr, limitPointStr, options = {}) => {
   try {
+    const {
+      showDerivative = false,
+      useLogScale = false,
+      xRange = null,
+      limitValue = null
+    } = options;
+
     const normalizedExpr = normalizeExpression(functionStr);
     const limitPoint = parseLimitPoint(limitPointStr);
     
@@ -23,7 +31,11 @@ export const generateEnhancedGraphData = (functionStr, limitPointStr) => {
     // Configuração do intervalo
     let xMin, xMax, numPoints;
     
-    if (Math.abs(limitPoint) === Infinity) {
+    if (xRange) {
+      xMin = xRange[0];
+      xMax = xRange[1];
+      numPoints = 1000;
+    } else if (Math.abs(limitPoint) === Infinity) {
       if (limitPoint > 0) {
         xMin = 1;
         xMax = 100;
@@ -94,12 +106,50 @@ export const generateEnhancedGraphData = (functionStr, limitPointStr) => {
       name: `f(x) = ${functionStr}`,
       line: {
         color: '#6C63FF',
-        width: 2
+        width: 3
       },
-      connectgaps: false
+      connectgaps: false,
+      hovertemplate: '<b>x:</b> %{x:.3f}<br><b>f(x):</b> %{y:.4f}<extra></extra>'
     });
     
-    // Trace para descontinuidades
+    // Trace da derivada se solicitado
+    if (showDerivative) {
+      try {
+        const derivative = math.derivative(normalizedExpr, 'x');
+        const derivativeStr = derivative.toString();
+        const derivativeExpr = math.compile(derivativeStr);
+        
+        const derivativeY = [];
+        for (let i = 0; i <= numPoints; i++) {
+          const xi = xMin + (i / numPoints) * (xMax - xMin);
+          try {
+            const yi = derivativeExpr.evaluate({ x: xi });
+            derivativeY.push(isFinite(yi) ? yi : null);
+          } catch {
+            derivativeY.push(null);
+          }
+        }
+        
+        traces.push({
+          x: x,
+          y: derivativeY,
+          type: 'scatter',
+          mode: 'lines',
+          name: `f'(x)`,
+          line: {
+            color: '#00D2FF',
+            width: 2,
+            dash: 'dash'
+          },
+          connectgaps: false,
+          hovertemplate: '<b>x:</b> %{x:.3f}<br><b>f\'(x):</b> %{y:.4f}<extra></extra>'
+        });
+      } catch (error) {
+        console.warn('Erro ao calcular derivada:', error);
+      }
+    }
+    
+    // Trace para descontinuidades removíveis
     if (discontinuities.length > 0) {
       const discX = discontinuities.map(d => d.x);
       const discY = discontinuities.map(d => {
@@ -127,7 +177,29 @@ export const generateEnhancedGraphData = (functionStr, limitPointStr) => {
             color: '#FF6B6B',
             width: 2
           }
-        }
+        },
+        hovertemplate: '<b>x:</b> %{x:.3f}<br><b>Descontinuidade removível</b><extra></extra>'
+      });
+    }
+    
+    // Ponto do limite se o valor for conhecido
+    if (limitValue !== null && isFinite(limitValue) && Math.abs(limitPoint) !== Infinity) {
+      traces.push({
+        x: [limitPoint],
+        y: [limitValue],
+        type: 'scatter',
+        mode: 'markers',
+        name: `Limite: (${limitPoint}, ${limitValue})`,
+        marker: {
+          color: '#FFD166',
+          size: 10,
+          symbol: 'circle',
+          line: {
+            color: '#FFFFFF',
+            width: 2
+          }
+        },
+        hovertemplate: `<b>Ponto do Limite</b><br><b>x:</b> ${limitPoint}<br><b>L:</b> ${limitValue}<extra></extra>`
       });
     }
     
@@ -142,10 +214,11 @@ export const generateEnhancedGraphData = (functionStr, limitPointStr) => {
           mode: 'lines',
           name: `x = ${limitPoint}`,
           line: {
-            color: '#FFD166',
+            color: 'rgba(255, 255, 255, 0.4)',
             width: 2,
             dash: 'dash'
-          }
+          },
+          hovertemplate: `<b>x = ${limitPoint}</b><extra></extra>`
         });
       }
     }
@@ -158,7 +231,7 @@ export const generateEnhancedGraphData = (functionStr, limitPointStr) => {
       const yRange = Math.max(...finiteY) - Math.min(...finiteY);
       
       // Ajusta zoom baseado na variação da função
-      if (yRange > 1000) {
+      if (yRange > 1000 && useLogScale) {
         // Função cresce muito rapidamente - usa escala logarítmica
         yMin = Math.min(...finiteY.filter(yi => yi > 0));
         yMax = Math.max(...finiteY.filter(yi => yi > 0));
@@ -181,33 +254,54 @@ export const generateEnhancedGraphData = (functionStr, limitPointStr) => {
       layout: {
         title: {
           text: `Gráfico de f(x) = ${functionStr}${Math.abs(limitPoint) === Infinity ? ' (comportamento no infinito)' : ''}`,
-          font: { color: '#FFFFFF', size: 16 }
+          font: { 
+            color: '#B8B8CC', 
+            size: 16,
+            family: 'Inter'
+          }
         },
         xaxis: {
-          title: 'x',
+          title: {
+            text: 'x',
+            font: { color: '#B8B8CC', family: 'Inter' }
+          },
           range: [xMin, xMax],
           color: '#B8B8CC',
-          gridcolor: 'rgba(255, 255, 255, 0.1)',
-          zerolinecolor: 'rgba(255, 255, 255, 0.3)'
+          gridcolor: 'rgba(184, 184, 204, 0.15)',
+          zerolinecolor: 'rgba(255, 255, 255, 0.3)',
+          tickfont: { color: '#B8B8CC', family: 'Inter' }
         },
         yaxis: {
-          title: 'f(x)',
+          title: {
+            text: 'f(x)',
+            font: { color: '#B8B8CC', family: 'Inter' }
+          },
           range: [yMin, yMax],
           color: '#B8B8CC',
-          gridcolor: 'rgba(255, 255, 255, 0.1)',
-          zerolinecolor: 'rgba(255, 255, 255, 0.3)'
+          gridcolor: 'rgba(184, 184, 204, 0.15)',
+          zerolinecolor: 'rgba(255, 255, 255, 0.3)',
+          tickfont: { color: '#B8B8CC', family: 'Inter' },
+          type: useLogScale ? 'log' : 'linear'
         },
-        plot_bgcolor: 'rgba(0, 0, 0, 0)',
-        paper_bgcolor: 'rgba(0, 0, 0, 0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        paper_bgcolor: 'rgba(0,0,0,0)',
         showlegend: true,
         legend: {
-          font: { color: '#B8B8CC' }
+          font: { color: '#B8B8CC', family: 'Inter' },
+          bgcolor: 'rgba(30, 30, 47, 0.8)',
+          bordercolor: 'rgba(255, 255, 255, 0.1)',
+          borderwidth: 1
         },
+        hovermode: 'x unified',
         margin: {
           l: 60,
           r: 30,
           t: 60,
           b: 60
+        },
+        font: {
+          family: 'Inter',
+          color: '#B8B8CC'
         }
       },
       config: {
@@ -230,9 +324,23 @@ export const generateEnhancedGraphData = (functionStr, limitPointStr) => {
         marker: { color: '#FF6B6B', size: 10 }
       }],
       layout: {
-        title: `Erro ao plotar: ${error.message}`,
-        xaxis: { title: 'x' },
-        yaxis: { title: 'f(x)' }
+        title: {
+          text: `Erro ao plotar: ${error.message}`,
+          font: { color: '#B8B8CC', family: 'Inter' }
+        },
+        xaxis: { 
+          title: 'x',
+          color: '#B8B8CC',
+          tickfont: { color: '#B8B8CC', family: 'Inter' }
+        },
+        yaxis: { 
+          title: 'f(x)',
+          color: '#B8B8CC',
+          tickfont: { color: '#B8B8CC', family: 'Inter' }
+        },
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        font: { family: 'Inter', color: '#B8B8CC' }
       },
       config: { responsive: true }
     };
@@ -319,13 +427,68 @@ export const calculateLateralLimits = (functionStr, point, delta = 0.001) => {
 };
 
 /**
+ * Detecta descontinuidades removíveis em uma função
+ * @param {string} functionStr - Expressão da função
+ * @param {number} point - Ponto para verificar
+ * @param {number} tolerance - Tolerância para detecção
+ * @returns {Object} {isRemovable, leftLimit, rightLimit, reason}
+ */
+export const detectRemovableDiscontinuity = (functionStr, point, tolerance = 0.001) => {
+  try {
+    const normalizedExpr = normalizeExpression(functionStr);
+    const expr = math.compile(normalizedExpr);
+    
+    // Verifica se a função está definida no ponto
+    let isDefinedAtPoint = false;
+    try {
+      const valueAtPoint = expr.evaluate({ x: point });
+      isDefinedAtPoint = isFinite(valueAtPoint);
+    } catch {
+      isDefinedAtPoint = false;
+    }
+    
+    // Calcula limites laterais
+    const leftLimit = expr.evaluate({ x: point - tolerance });
+    const rightLimit = expr.evaluate({ x: point + tolerance });
+    
+    const limitsExist = isFinite(leftLimit) && isFinite(rightLimit);
+    const limitsEqual = Math.abs(leftLimit - rightLimit) < 1e-6;
+    
+    if (!isDefinedAtPoint && limitsExist && limitsEqual) {
+      return {
+        isRemovable: true,
+        leftLimit,
+        rightLimit,
+        reason: 'Descontinuidade removível - limites laterais iguais'
+      };
+    }
+    
+    return {
+      isRemovable: false,
+      leftLimit,
+      rightLimit,
+      reason: isDefinedAtPoint ? 'Função definida no ponto' : 'Limites laterais diferentes ou inexistentes'
+    };
+    
+  } catch (error) {
+    return {
+      isRemovable: false,
+      leftLimit: null,
+      rightLimit: null,
+      reason: `Erro na análise: ${error.message}`
+    };
+  }
+};
+
+/**
  * Gera gráfico com zoom inteligente baseado no comportamento da função
  * @param {string} functionStr - Expressão da função
  * @param {string} limitPointStr - Ponto limite
+ * @param {Object} options - Opções adicionais
  * @returns {Object} Dados do gráfico com zoom otimizado
  */
-export const generateSmartZoomGraph = (functionStr, limitPointStr) => {
-  const baseGraph = generateEnhancedGraphData(functionStr, limitPointStr);
+export const generateSmartZoomGraph = (functionStr, limitPointStr, options = {}) => {
+  const baseGraph = generateEnhancedGraphData(functionStr, limitPointStr, options);
   
   try {
     const limitPoint = parseLimitPoint(limitPointStr);
@@ -359,7 +522,7 @@ export const generateSmartZoomGraph = (functionStr, limitPointStr) => {
       const range = Math.max(...values) - Math.min(...values);
       
       // Se a função varia muito rapidamente, ajusta o zoom
-      if (range > 100) {
+      if (range > 100 && !options.useLogScale) {
         const yMin = Math.min(...values) - range * 0.1;
         const yMax = Math.max(...values) + range * 0.1;
         
