@@ -15,7 +15,9 @@ import {
   Paper,
   Typography,
   Alert,
-  Chip
+  Chip,
+  Tooltip,
+  InputAdornment
 } from '@mui/material';
 import {
   Calculate,
@@ -25,10 +27,14 @@ import {
   Refresh,
   Lightbulb,
   ShowChart,
-  AutoFixHigh
+  AutoFixHigh,
+  Error,
+  CheckCircle
 } from '@mui/icons-material';
 import { DIRECTION_OPTIONS } from '../utils/constants.js';
 import SyntaxTipsModal from './SyntaxTipsModal.jsx';
+import CalculationHistory from './CalculationHistory.jsx';
+import { useRealTimeValidation } from '../hooks/useRealTimeValidation.js';
 
 const InputSection = ({
   functionValue,
@@ -48,6 +54,37 @@ const InputSection = ({
   onAutoCorrect
 }) => {
   const [showSyntaxTips, setShowSyntaxTips] = React.useState(false);
+  const { validation: realTimeValidation, validateExpression } = useRealTimeValidation();
+
+  // Validação em tempo real
+  React.useEffect(() => {
+    validateExpression(functionValue);
+  }, [functionValue, validateExpression]);
+
+  const handleLoadFromHistory = (calculation) => {
+    setFunctionValue(calculation.function);
+    setLimitPoint(calculation.point);
+    setDirection(calculation.direction);
+  };
+
+  const getValidationIcon = () => {
+    if (realTimeValidation.isValidating) {
+      return <Refresh sx={{ animation: 'spin 1s linear infinite' }} />;
+    }
+    if (!realTimeValidation.valid) {
+      return <Error color="error" />;
+    }
+    if (realTimeValidation.warnings.length > 0) {
+      return <Error color="warning" />;
+    }
+    return <CheckCircle color="success" />;
+  };
+
+  const getValidationColor = () => {
+    if (!realTimeValidation.valid) return 'error';
+    if (realTimeValidation.warnings.length > 0) return 'warning';
+    return 'success';
+  };
   return (
     <Paper elevation={0} sx={{ 
       p: 4, 
@@ -123,7 +160,7 @@ const InputSection = ({
         </Alert>
       )}
       
-      {/* Campo da função */}
+      {/* Campo da função com validação em tempo real */}
       <TextField
         fullWidth
         label="f(x) ="
@@ -131,14 +168,35 @@ const InputSection = ({
         onChange={(e) => setFunctionValue(e.target.value)}
         placeholder="Ex: (x^2 - 1)/(x - 1)"
         variant="outlined"
-        error={!validation.valid}
+        error={!realTimeValidation.valid}
         helperText={
-          !validation.valid 
-            ? validation.errors[0] 
-            : validation.warnings.length > 0 
-            ? validation.warnings[0] 
+          realTimeValidation.isValidating 
+            ? 'Validando...'
+            : !realTimeValidation.valid 
+            ? realTimeValidation.errors[0] 
+            : realTimeValidation.warnings.length > 0 
+            ? realTimeValidation.warnings[0] 
             : ''
         }
+        InputProps={{
+          style: { 
+            fontFamily: 'JetBrains Mono, monospace', 
+            fontSize: '1.1rem',
+            color: '#FFFFFF'
+          },
+          endAdornment: (
+            <InputAdornment position="end">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Tooltip title={realTimeValidation.isValidating ? 'Validando...' : realTimeValidation.valid ? 'Expressão válida' : 'Expressão inválida'}>
+                  <Box sx={{ color: getValidationColor() === 'error' ? '#FF6B6B' : getValidationColor() === 'warning' ? '#FFD166' : '#00D2FF' }}>
+                    {getValidationIcon()}
+                  </Box>
+                </Tooltip>
+                <CalculationHistory onLoadCalculation={handleLoadFromHistory} />
+              </Box>
+            </InputAdornment>
+          )
+        }}
         sx={{ 
           mb: 3,
           '& .MuiInputLabel-root': {
@@ -148,14 +206,7 @@ const InputSection = ({
             }
           },
           '& .MuiFormHelperText-root': {
-            color: !validation.valid ? '#FF6B6B' : '#FFD166'
-          }
-        }}
-        InputProps={{
-          style: { 
-            fontFamily: 'JetBrains Mono, monospace', 
-            fontSize: '1.1rem',
-            color: '#FFFFFF'
+            color: !realTimeValidation.valid ? '#FF6B6B' : '#FFD166'
           }
         }}
       />

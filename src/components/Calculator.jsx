@@ -16,6 +16,8 @@ import {
   Refresh,
   Info
 } from '@mui/icons-material';
+// Temporariamente removido framer-motion - usando CSS puro para animações
+// import { motion } from 'framer-motion';
 import { useAdvancedLimits } from '../hooks/useAdvancedLimits.js';
 import { math } from '../utils/mathConfig.js';
 // Removido: import de teste
@@ -66,8 +68,6 @@ const Calculator = () => {
     setShowHelp,
     showGraph,
     setShowGraph,
-    showSyntaxTips,
-    setShowSyntaxTips,
     
     // Funções principais
     handleCalculate,
@@ -80,8 +80,6 @@ const Calculator = () => {
     handleStepClick,
     
     // Funções utilitárias
-    getExamples,
-    getStats,
     handleAutoCorrect
   } = useAdvancedLimits();
 
@@ -115,8 +113,9 @@ const Calculator = () => {
         position: 'relative'
       }}
     >
-      {/* Header */}
-      <AppBar position="static" elevation={0} className="animate-slide-in">
+      {/* Header com animação */}
+      <div className="animate-slide-in">
+        <AppBar position="static" elevation={0} className="animate-slide-in">
         <Toolbar sx={{ py: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexGrow: 1 }}>
             <Box sx={{ 
@@ -192,6 +191,7 @@ const Calculator = () => {
           </Box>
         </Toolbar>
       </AppBar>
+      </div>
 
       {/* Conteúdo Principal */}
       <Box sx={{ py: 1, px: 0, width: '100%', margin: 0 }}>
@@ -209,15 +209,16 @@ const Calculator = () => {
           margin: 0,
           padding: { xs: 2, md: 3 }
         }}>
-          {/* Coluna da Esquerda - Entrada */}
-          <Box sx={{ 
-            display: 'flex',
-            flexDirection: 'column',
-            height: 'fit-content',
-            position: { md: 'sticky' },
-            top: 20,
-            className: 'animate-slide-in'
-          }}>
+          {/* Coluna da Esquerda - Entrada com animação */}
+          <div className="animate-slide-in" style={{ animationDelay: '0.2s' }}>
+            <Box sx={{ 
+              display: 'flex',
+              flexDirection: 'column',
+              height: 'fit-content',
+              position: { md: 'sticky' },
+              top: 20,
+              className: 'animate-slide-in'
+            }}>
             <InputSection
               functionValue={functionValue}
               setFunctionValue={setFunctionValue}
@@ -234,16 +235,18 @@ const Calculator = () => {
               suggestions={suggestions}
               onAutoCorrect={handleAutoCorrect}
             />
-          </Box>
+            </Box>
+          </div>
 
-          {/* Coluna Central - Resultados */}
-          <Box sx={{ 
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: 'calc(100vh - 120px)',
-            overflow: 'hidden',
-            className: 'animate-fade-in'
-          }}>
+          {/* Coluna Central - Resultados com animação */}
+          <div className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <Box sx={{ 
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 'calc(100vh - 120px)',
+              overflow: 'hidden',
+              className: 'animate-fade-in'
+            }}>
             <ResultSection
               result={result}
               steps={steps}
@@ -260,15 +263,17 @@ const Calculator = () => {
               onToggleStepDetails={toggleStepDetails}
               onStepClick={handleStepClick}
             />
-          </Box>
+            </Box>
+          </div>
 
-          {/* Coluna da Direita - Gráficos e Ajuda (apenas desktop) */}
-          <Box sx={{ 
-            display: { xs: 'none', xl: 'flex' },
-            flexDirection: 'column',
-            gap: 3,
-            className: 'animate-scale-in'
-          }}>
+          {/* Coluna da Direita - Gráficos com animação */}
+          <div className="animate-scale-in" style={{ animationDelay: '0.6s' }}>
+            <Box sx={{ 
+              display: { xs: 'none', xl: 'flex' },
+              flexDirection: 'column',
+              gap: 3,
+              className: 'animate-scale-in'
+            }}>
             {/* Teste do Plotly */}
             <PlotlyTest />
             
@@ -362,7 +367,8 @@ const Calculator = () => {
                 </>
               )}
             </Box>
-          </Box>
+            </Box>
+          </div>
         </Box>
 
         {/* Modais */}
@@ -385,18 +391,19 @@ const Calculator = () => {
         />
       </Box>
 
-      {/* Footer */}
-      <Box 
-        component="footer" 
-        sx={{ 
-          background: 'rgba(255, 255, 255, 0.05)',
-          backdropFilter: 'blur(20px)',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          py: 1.5, 
-          mt: 3,
-          textAlign: 'center'
-        }}
-      >
+      {/* Footer com animação */}
+      <div className="animate-fade-in" style={{ animationDelay: '0.8s' }}>
+        <Box 
+          component="footer" 
+          sx={{ 
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(20px)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            py: 1.5, 
+            mt: 3,
+            textAlign: 'center'
+          }}
+        >
         <Typography variant="body2" sx={{ 
           color: 'rgba(255, 255, 255, 0.7)',
           fontWeight: 500,
@@ -412,7 +419,8 @@ const Calculator = () => {
         }}>
           Migrado do sistema Python original
         </Typography>
-      </Box>
+        </Box>
+      </div>
     </CustomScrollbar>
   );
 };

@@ -14,6 +14,7 @@ import {
   parseLimitPoint, 
   formatResult 
 } from './mathParser.js';
+import { applyLHospitalRule, detectLHospitalCandidate } from './lhopitalEngine.js';
 
 // math já importado do mathConfig.js com configuração padronizada
 
@@ -198,6 +199,37 @@ export const calculateLimit = (functionStr, limitPointStr, direction) => {
     
     // Gera dicas baseadas na forma
     tips = generateTips(form, normalizedExpr);
+    
+    // Tenta aplicar L'Hôpital para formas indeterminadas
+    if (form === INDETERMINATE_FORMS.ZERO_OVER_ZERO || form === INDETERMINATE_FORMS.INFINITY_OVER_INFINITY) {
+      const lhopitalCandidate = detectLHospitalCandidate(normalizedExpr, limitPoint);
+      
+      if (lhopitalCandidate.isCandidate) {
+        steps.push(`🔍 ${lhopitalCandidate.reason}`);
+        steps.push(`📐 Tentando aplicar a Regra de L'Hôpital...`);
+        
+        const lhopitalResult = applyLHospitalRule(
+          lhopitalCandidate.numerator,
+          lhopitalCandidate.denominator,
+          limitPoint
+        );
+        
+        if (lhopitalResult.success) {
+          steps.push(...lhopitalResult.steps);
+          result = lhopitalResult.result;
+          steps.push(`✅ Resultado via L'Hôpital: ${formatResult(result)}`);
+          
+          return {
+            result: formatResult(result),
+            steps,
+            tips: [...tips, 'Regra de L\'Hôpital aplicada com sucesso'],
+            method: 'lhopital'
+          };
+        } else {
+          steps.push(`⚠️ L'Hôpital não resolveu: ${lhopitalResult.result}`);
+        }
+      }
+    }
     
       // Calcula o limite usando Math.js
       let result;
