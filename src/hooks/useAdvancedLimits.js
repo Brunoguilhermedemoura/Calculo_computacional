@@ -11,8 +11,12 @@ import {
   getAdvancedExamples,
   getSystemStats
 } from '../services/advancedLimitsEngine.js';
+import { saveCalculation, getUserCalculations, clearUserHistory } from '../services/userStorageService.js';
+import { useAuth } from './useAuth.js';
 
 export const useAdvancedLimits = () => {
+  const { user } = useAuth();
+  
   // Estados principais
   const [functionValue, setFunctionValue] = useState('');
   const [limitPoint, setLimitPoint] = useState('');
@@ -51,17 +55,34 @@ export const useAdvancedLimits = () => {
   const calculationTimeoutRef = useRef(null);
   const stepAnimationRef = useRef(null);
 
-  // Carregar histórico do localStorage
+  // Carregar histórico do usuário
   useEffect(() => {
-    const savedHistory = localStorage.getItem('calculationHistory');
-    if (savedHistory) {
-      try {
-        setHistory(JSON.parse(savedHistory));
-      } catch (error) {
-        console.error('Erro ao carregar histórico:', error);
+    const loadUserHistory = () => {
+      if (user) {
+        // Carrega histórico do usuário logado
+        const userCalculations = getUserCalculations(20); // Últimos 20 cálculos
+        setHistory(userCalculations.map(calc => ({
+          function: calc.functionValue || calc.function,
+          point: calc.limitPoint || calc.point,
+          direction: calc.direction,
+          result: calc.result,
+          timestamp: calc.timestamp
+        })));
+      } else {
+        // Fallback para histórico local (usuário não logado)
+        const savedHistory = localStorage.getItem('calculationHistory');
+        if (savedHistory) {
+          try {
+            setHistory(JSON.parse(savedHistory));
+          } catch (error) {
+            console.error('Erro ao carregar histórico:', error);
+          }
+        }
       }
-    }
-  }, []);
+    };
+
+    loadUserHistory();
+  }, [user]);
 
   // Validação em tempo real
   useEffect(() => {
@@ -136,12 +157,30 @@ export const useAdvancedLimits = () => {
       
       // Salva no histórico se o cálculo foi bem-sucedido
       if (detailedResult.result !== 'Erro') {
+        // Salva no histórico local (compatibilidade)
         saveToHistory({
           function: functionValue,
           point: limitPoint,
           direction: direction,
           result: detailedResult.result
         });
+
+        // Salva no histórico do usuário (novo sistema)
+        if (user) {
+          const calculationData = {
+            functionValue,
+            limitPoint,
+            direction,
+            result: detailedResult.result,
+            steps: detailedResult.steps,
+            strategy: detailedResult.strategy,
+            form: detailedResult.form,
+            tips: detailedResult.tips,
+            formInfo: detailedResult.formInfo,
+            strategyInfo: detailedResult.strategyInfo
+          };
+          saveCalculation(calculationData);
+        }
       }
       
       // Anima os passos sequencialmente
@@ -164,7 +203,7 @@ export const useAdvancedLimits = () => {
     } finally {
       setIsCalculating(false);
     }
-  }, [functionValue, limitPoint, direction, validation.valid, saveToHistory]);
+  }, [functionValue, limitPoint, direction, validation.valid, saveToHistory, user]);
 
   // Função para limpar resultados
   const clearResults = useCallback(() => {
@@ -249,8 +288,15 @@ export const useAdvancedLimits = () => {
   // Função para limpar histórico
   const clearHistory = useCallback(() => {
     setHistory([]);
-    localStorage.removeItem('calculationHistory');
-  }, []);
+    
+    if (user) {
+      // Limpa histórico do usuário
+      clearUserHistory();
+    } else {
+      // Limpa histórico local
+      localStorage.removeItem('calculationHistory');
+    }
+  }, [user]);
 
   // Cleanup ao desmontar
   useEffect(() => {

@@ -20,6 +20,7 @@ import {
   Info,
   ExpandMore
 } from '@mui/icons-material';
+import UserProfile from './UserProfile.jsx';
 // Temporariamente removido framer-motion - usando CSS puro para animações
 // import { motion } from 'framer-motion';
 import { useAdvancedLimits } from '../hooks/useAdvancedLimits.js';
@@ -34,7 +35,7 @@ import PlotlyTest from './PlotlyTest.jsx';
 import SimpleChart from './SimpleChart.jsx';
 import CustomScrollbar from './CustomScrollbar.jsx';
 
-const Calculator = () => {
+const Calculator = ({ onLogout }) => {
   // math já importado do mathConfig.js
   
   const {
@@ -163,7 +164,7 @@ const Calculator = () => {
             </Box>
           </Box>
           
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
             <Tooltip title="Resetar Calculadora">
               <IconButton 
                 color="inherit" 
@@ -196,6 +197,9 @@ const Calculator = () => {
                 <Info />
               </IconButton>
             </Tooltip>
+
+            {/* Perfil do usuário */}
+            <UserProfile onLogout={onLogout} />
           </Box>
         </Toolbar>
       </AppBar>

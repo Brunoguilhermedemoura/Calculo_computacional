@@ -2,10 +2,15 @@
  * Aplicação principal da Calculadora de Limites
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import './styles/globals.css';
+import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
+import { useSettings } from './hooks/useSettings.js';
+import LoginPage from './components/auth/LoginPage.jsx';
+import RegisterPage from './components/auth/RegisterPage.jsx';
+import Dashboard from './components/Dashboard.jsx';
 import Calculator from './components/Calculator.jsx';
 
 // Tema educacional moderno com neumorfismo
@@ -180,11 +185,106 @@ const theme = createTheme({
   },
 });
 
+// Componente interno da aplicação com roteamento
+const AppContent = () => {
+  const { user, loading } = useAuth();
+  const { settings, applyAppearance } = useSettings();
+  const [currentView, setCurrentView] = useState('login'); // 'login', 'register', 'dashboard', 'calculator'
+  const [hasVisitedDashboard, setHasVisitedDashboard] = useState(false);
+
+  // Aplicar configurações de aparência quando carregadas
+  React.useEffect(() => {
+    if (settings) {
+      applyAppearance();
+    }
+  }, [settings, applyAppearance]);
+
+  // Lógica de roteamento baseada no estado de autenticação
+  React.useEffect(() => {
+    if (!loading) {
+      if (user) {
+        // Usuário logado - verifica se já visitou o dashboard
+        if (!hasVisitedDashboard) {
+          setCurrentView('dashboard');
+        } else {
+          setCurrentView('calculator');
+        }
+      } else {
+        // Usuário não logado
+        setCurrentView('login');
+        setHasVisitedDashboard(false);
+      }
+    }
+  }, [user, loading, hasVisitedDashboard]);
+
+  // Handlers de navegação
+  const handleSwitchToRegister = () => {
+    setCurrentView('register');
+  };
+
+  const handleSwitchToLogin = () => {
+    setCurrentView('login');
+  };
+
+  const handleStartCalculator = () => {
+    setHasVisitedDashboard(true);
+    setCurrentView('calculator');
+  };
+
+  const handleLogout = () => {
+    setHasVisitedDashboard(false);
+    setCurrentView('login');
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #1E1E2F 0%, #2A2A3E 50%, #1E1E2F 100%)'
+        }}>
+          <div style={{ color: '#6C63FF', fontSize: '1.2rem' }}>Carregando...</div>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  // Renderização baseada na view atual
+  switch (currentView) {
+    case 'login':
+      return <LoginPage onSwitchToRegister={handleSwitchToRegister} />;
+    
+    case 'register':
+      return <RegisterPage onSwitchToLogin={handleSwitchToLogin} />;
+    
+    case 'dashboard':
+      return (
+        <Dashboard 
+          onStartCalculator={handleStartCalculator}
+          onLogout={handleLogout}
+        />
+      );
+    
+    case 'calculator':
+      return <Calculator onLogout={handleLogout} />;
+    
+    default:
+      return <LoginPage onSwitchToRegister={handleSwitchToRegister} />;
+  }
+};
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Calculator />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </ThemeProvider>
   );
 }
