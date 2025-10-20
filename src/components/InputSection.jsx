@@ -62,12 +62,48 @@ const InputSection = ({
   const [showSyntaxTips, setShowSyntaxTips] = React.useState(false);
   const [showKeyboard, setShowKeyboard] = React.useState(false);
   const inputRef = useRef(null);
+  const nextCursorPositionRef = useRef(null);
+  const lastCursorPositionRef = useRef(0);
   const { validation: realTimeValidation, validateExpression } = useRealTimeValidation();
 
   // Validação em tempo real
   React.useEffect(() => {
     validateExpression(functionValue);
   }, [functionValue, validateExpression]);
+
+  // Restaurar posição do cursor após atualizações do teclado virtual
+  React.useEffect(() => {
+    if (inputRef.current && nextCursorPositionRef.current !== null) {
+      // Usar requestAnimationFrame para garantir que o DOM foi atualizado
+      requestAnimationFrame(() => {
+        if (inputRef.current) {
+          const pos = nextCursorPositionRef.current;
+          console.log('Restoring cursor to position:', pos);
+          inputRef.current.setSelectionRange(pos, pos);
+          inputRef.current.focus();
+          // Limpar a referência após usar
+          nextCursorPositionRef.current = null;
+        }
+      });
+    }
+  }, [functionValue]);
+
+  // Capturar posição do cursor quando o usuário clica ou digita
+  const handleInputClick = () => {
+    if (inputRef.current) {
+      const pos = inputRef.current.selectionStart || 0;
+      lastCursorPositionRef.current = pos;
+      console.log('Input clicked - Cursor pos:', pos);
+    }
+  };
+
+  const handleInputKeyDown = () => {
+    if (inputRef.current) {
+      const pos = inputRef.current.selectionStart || 0;
+      lastCursorPositionRef.current = pos;
+      console.log('Input key down - Cursor pos:', pos);
+    }
+  };
 
   const handleLoadFromHistory = (calculation) => {
     setFunctionValue(calculation.function);
@@ -77,31 +113,37 @@ const InputSection = ({
 
   // Função para lidar com teclas do teclado virtual
   const handleKeyPress = (key) => {
+    // Usar a última posição conhecida do cursor
+    const cursorPos = lastCursorPositionRef.current;
+    console.log('Virtual keyboard - Cursor pos:', cursorPos, 'Key:', key, 'Function:', functionValue);
+    
     if (key === 'backspace') {
-      // Remover último caractere
-      setFunctionValue(prev => prev.slice(0, -1));
+      if (cursorPos > 0) {
+        const newValue = 
+          functionValue.slice(0, cursorPos - 1) + 
+          functionValue.slice(cursorPos);
+        console.log('Backspace - New value:', newValue);
+        setFunctionValue(newValue);
+        // Atualizar posição do cursor
+        lastCursorPositionRef.current = cursorPos - 1;
+        nextCursorPositionRef.current = cursorPos - 1;
+      }
       return;
     }
 
-    // Obter posição do cursor
-    const cursorPosition = inputRef.current?.selectionStart || functionValue.length;
-    
     // Inserir caractere na posição do cursor
     const newValue = 
-      functionValue.slice(0, cursorPosition) + 
+      functionValue.slice(0, cursorPos) + 
       key + 
-      functionValue.slice(cursorPosition);
+      functionValue.slice(cursorPos);
     
+    console.log('Insert - New value:', newValue);
     setFunctionValue(newValue);
-
-    // Restaurar posição do cursor após a atualização
-    setTimeout(() => {
-      if (inputRef.current) {
-        const newCursorPosition = cursorPosition + key.length;
-        inputRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
-        inputRef.current.focus();
-      }
-    }, 0);
+    
+    // Atualizar posição do cursor
+    const newCursorPos = cursorPos + key.length;
+    lastCursorPositionRef.current = newCursorPos;
+    nextCursorPositionRef.current = newCursorPos;
   };
 
   const getValidationIcon = () => {
@@ -124,7 +166,7 @@ const InputSection = ({
   };
   return (
     <Paper elevation={0} sx={{ 
-      p: 4, 
+      p: 3, 
       height: 'fit-content',
       background: 'rgba(30, 30, 47, 0.8)',
       backdropFilter: 'blur(20px)',
@@ -146,17 +188,17 @@ const InputSection = ({
         animation: 'shimmer 3s ease-in-out infinite'
       }} />
       
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
         <Box sx={{
-          width: 40,
-          height: 40,
-          borderRadius: 12,
+          width: 36,
+          height: 36,
+          borderRadius: 10,
           background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           color: 'white',
-          fontSize: '1.2rem',
+          fontSize: '1.1rem',
           boxShadow: '0 4px 16px rgba(108, 99, 255, 0.3)'
         }}>
           📝
@@ -165,13 +207,13 @@ const InputSection = ({
           <Typography variant="h6" sx={{ 
             color: '#6C63FF', 
             fontWeight: 700,
-            fontSize: '1.1rem'
+            fontSize: '1rem'
           }}>
             Entradas
           </Typography>
           <Typography variant="body2" sx={{ 
             color: '#B8B8CC',
-            fontSize: '0.85rem'
+            fontSize: '0.8rem'
           }}>
             Insira a função e o ponto limite
           </Typography>
@@ -204,6 +246,8 @@ const InputSection = ({
         label="f(x) ="
         value={functionValue}
         onChange={(e) => setFunctionValue(e.target.value)}
+        onClick={handleInputClick}
+        onKeyDown={handleInputKeyDown}
         placeholder="Ex: (x^2 - 1)/(x - 1)"
         variant="outlined"
         error={!realTimeValidation.valid}
@@ -430,12 +474,13 @@ const InputSection = ({
           variant="outlined"
           size="medium"
           sx={{ 
-            py: 1.5,
+            py: 1.2,
             borderRadius: 12,
             border: '2px solid rgba(108, 99, 255, 0.3)',
             background: 'rgba(30, 30, 47, 0.6)',
             backdropFilter: 'blur(10px)',
             color: '#6C63FF',
+            fontSize: '0.9rem',
             '&:hover': {
               border: '2px solid rgba(108, 99, 255, 0.6)',
               background: 'rgba(108, 99, 255, 0.1)',
@@ -452,12 +497,13 @@ const InputSection = ({
           variant="outlined"
           size="medium"
           sx={{ 
-            py: 1.5,
+            py: 1.2,
             borderRadius: 12,
             border: '2px solid rgba(0, 210, 255, 0.3)',
             background: 'rgba(30, 30, 47, 0.6)',
             backdropFilter: 'blur(10px)',
             color: '#00D2FF',
+            fontSize: '0.9rem',
             '&:hover': {
               border: '2px solid rgba(0, 210, 255, 0.6)',
               background: 'rgba(0, 210, 255, 0.1)',
@@ -474,12 +520,13 @@ const InputSection = ({
           variant="outlined"
           size="medium"
           sx={{ 
-            py: 1.5,
+            py: 1.2,
             borderRadius: 12,
             border: '2px solid rgba(255, 209, 102, 0.3)',
             background: 'rgba(30, 30, 47, 0.6)',
             backdropFilter: 'blur(10px)',
             color: '#FFD166',
+            fontSize: '0.9rem',
             '&:hover': {
               border: '2px solid rgba(255, 209, 102, 0.6)',
               background: 'rgba(255, 209, 102, 0.1)',
@@ -501,12 +548,13 @@ const InputSection = ({
           variant="outlined"
           size="medium"
           sx={{ 
-            py: 1.5,
+            py: 1.2,
             borderRadius: 12,
             border: '2px solid rgba(255, 107, 107, 0.3)',
             background: 'rgba(30, 30, 47, 0.6)',
             backdropFilter: 'blur(10px)',
             color: '#FF6B6B',
+            fontSize: '0.9rem',
             '&:hover': {
               border: '2px solid rgba(255, 107, 107, 0.6)',
               background: 'rgba(255, 107, 107, 0.1)',

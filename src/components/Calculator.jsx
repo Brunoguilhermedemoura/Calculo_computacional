@@ -10,11 +10,15 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  Tooltip
+  Tooltip,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails
 } from '@mui/material';
 import {
   Refresh,
-  Info
+  Info,
+  ExpandMore
 } from '@mui/icons-material';
 // Temporariamente removido framer-motion - usando CSS puro para animações
 // import { motion } from 'framer-motion';
@@ -120,11 +124,11 @@ const Calculator = () => {
       {/* Header com animação */}
       <div className="animate-slide-in">
         <AppBar position="static" elevation={0} className="animate-slide-in">
-        <Toolbar sx={{ py: 2 }}>
+        <Toolbar sx={{ py: 1.5 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexGrow: 1 }}>
             <Box sx={{ 
-              width: 50, 
-              height: 50, 
+              width: 45, 
+              height: 45, 
               borderRadius: 12, 
               background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
               display: 'flex',
@@ -132,7 +136,7 @@ const Calculator = () => {
               justifyContent: 'center',
               color: 'white',
               fontWeight: 'bold',
-              fontSize: '1.5rem',
+              fontSize: '1.3rem',
               boxShadow: '0 8px 32px rgba(108, 99, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
               animation: 'glow 3s ease-in-out infinite'
             }}>
@@ -204,10 +208,11 @@ const Calculator = () => {
           display: 'grid',
           gridTemplateColumns: { 
             xs: '1fr', 
-            md: '400px 1fr', 
-            xl: '400px 1fr 350px' 
+            md: '450px 1fr', 
+            lg: '450px 1fr 400px',
+            xl: '480px 1fr 420px' 
           },
-          gap: 4,
+          gap: 3,
           width: '100%',
           minHeight: 'calc(100vh - 120px)',
           margin: 0,
@@ -275,13 +280,40 @@ const Calculator = () => {
           {/* Coluna da Direita - Gráficos com animação */}
           <div className="animate-scale-in" style={{ animationDelay: '0.6s' }}>
             <Box sx={{ 
-              display: { xs: 'none', xl: 'flex' },
+              display: { xs: 'none', lg: 'flex' },
               flexDirection: 'column',
               gap: 3,
               className: 'animate-scale-in'
             }}>
-            {/* Teste do Plotly */}
-            <PlotlyTest />
+            {/* Teste do Plotly em Accordion */}
+            <Accordion sx={{
+              background: 'rgba(30, 30, 47, 0.8)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '16px !important',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+              '&:before': { display: 'none' },
+              '&.Mui-expanded': { margin: 0 }
+            }}>
+              <AccordionSummary
+                expandIcon={<ExpandMore sx={{ color: '#6C63FF' }} />}
+                sx={{ 
+                  borderRadius: '16px 16px 0 0',
+                  '&.Mui-expanded': { minHeight: 'auto' }
+                }}
+              >
+                <Typography variant="h6" sx={{ 
+                  color: '#6C63FF', 
+                  fontWeight: 600,
+                  fontSize: '0.95rem'
+                }}>
+                  🔧 Status do Sistema
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <PlotlyTest />
+              </AccordionDetails>
+            </Accordion>
             
             {/* Gráfico em tempo real */}
             <Box sx={{
@@ -299,16 +331,17 @@ const Calculator = () => {
                 mb: 2,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 1
+                gap: 1,
+                fontSize: '1rem'
               }}>
                 📊 Visualização
               </Typography>
               
               {functionValue && limitPoint ? (
                 <Box sx={{ 
-                  height: 500, 
+                  height: 400, 
                   width: '100%',
-                  minHeight: '500px',
+                  minHeight: '400px',
                   background: 'rgba(0, 0, 0, 0.2)',
                   borderRadius: 12,
                   p: 2
@@ -354,7 +387,7 @@ const Calculator = () => {
                 </Box>
               ) : (
                 <>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontSize: '0.85rem' }}>
                     Digite uma função e um ponto limite para ver o gráfico aqui.
                   </Typography>
                   <Box sx={{ 
@@ -366,7 +399,7 @@ const Calculator = () => {
                     justifyContent: 'center',
                     border: '2px dashed rgba(108, 99, 255, 0.3)'
                   }}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
                       Gráfico aparecerá aqui
                     </Typography>
                   </Box>
@@ -397,36 +430,6 @@ const Calculator = () => {
         />
       </Box>
 
-      {/* Footer com animação */}
-      <div className="animate-fade-in" style={{ animationDelay: '0.8s' }}>
-        <Box 
-          component="footer" 
-          sx={{ 
-            background: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(20px)',
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-            py: 1.5, 
-            mt: 3,
-            textAlign: 'center'
-          }}
-        >
-        <Typography variant="body2" sx={{ 
-          color: 'rgba(255, 255, 255, 0.7)',
-          fontWeight: 500,
-          fontSize: '0.875rem'
-        }}>
-          Desenvolvido com ❤️ usando React + Material-UI + Math.js
-        </Typography>
-        <Typography variant="caption" sx={{ 
-          color: 'rgba(255, 255, 255, 0.5)',
-          display: 'block',
-          mt: 0.5,
-          fontSize: '0.75rem'
-        }}>
-          Migrado do sistema Python original
-        </Typography>
-        </Box>
-      </div>
     </CustomScrollbar>
   );
 };

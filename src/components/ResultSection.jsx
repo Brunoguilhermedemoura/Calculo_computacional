@@ -142,7 +142,7 @@ const ResultSection = ({
     >
       {/* Resultado Principal */}
       <Paper elevation={0} sx={{ 
-        p: 4, 
+        p: 3, 
         flex: '0 0 auto',
         background: 'rgba(30, 30, 47, 0.8)',
         backdropFilter: 'blur(20px)',
@@ -164,17 +164,17 @@ const ResultSection = ({
           animation: 'shimmer 3s ease-in-out infinite'
         }} />
         
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2.5 }}>
           <Box sx={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
+            width: 36,
+            height: 36,
+            borderRadius: 10,
             background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: 'white',
-            fontSize: '1.2rem',
+            fontSize: '1.1rem',
             boxShadow: '0 4px 16px rgba(108, 99, 255, 0.3)'
           }}>
             {getResultIcon()}
@@ -183,13 +183,13 @@ const ResultSection = ({
             <Typography variant="h6" sx={{ 
               color: '#6C63FF', 
               fontWeight: 700,
-              fontSize: '1.1rem'
+              fontSize: '1rem'
             }}>
               Resultado
             </Typography>
             <Typography variant="body2" sx={{ 
               color: '#B8B8CC',
-              fontSize: '0.85rem'
+              fontSize: '0.8rem'
             }}>
               Limite calculado
             </Typography>
@@ -221,7 +221,7 @@ const ResultSection = ({
             borderColor: result === 'Erro' ? 'rgba(255, 107, 107, 0.3)' : 'rgba(0, 210, 255, 0.3)',
             backdropFilter: 'blur(10px)'
           }}>
-            <Typography variant="h4" component="div" sx={{ 
+            <Typography variant="h5" component="div" sx={{ 
               fontFamily: 'JetBrains Mono, monospace',
               color: '#FFFFFF',
               textAlign: 'center',

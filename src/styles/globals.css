@@ -149,6 +149,46 @@ body::before {
   max-width: 100vw !important;
 }
 
+/* Media queries para melhor responsividade */
+@media (max-width: 1200px) {
+  .grid-container {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+  
+  .grid-container > div:last-child {
+    order: -1; /* Move a coluna de visualização para cima em telas menores */
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-container {
+    padding: 1rem !important;
+    gap: 1.5rem !important;
+  }
+  
+  /* Reduzir padding dos componentes em mobile */
+  .MuiPaper-root {
+    padding: 1.5rem !important;
+  }
+  
+  /* Ajustar tamanhos de fonte em mobile */
+  .MuiTypography-h5 {
+    font-size: 1.1rem !important;
+  }
+  
+  .MuiTypography-h6 {
+    font-size: 0.95rem !important;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1536px) {
+  /* Ajustes para telas lg */
+  .grid-container {
+    grid-template-columns: 450px 1fr 400px !important;
+  }
+}
+
 /* Animações */
 @keyframes pulse {
   0% {
