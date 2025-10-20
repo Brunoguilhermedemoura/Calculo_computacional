@@ -1,6 +1,6 @@
 /**
  * Página de Registro
- * Interface de cadastro com validações e design consistente
+ * Interface de cadastro com design premium e efeitos visuais avançados
  */
 
 import React, { useState, useEffect } from 'react';
@@ -16,7 +16,11 @@ import {
   InputAdornment,
   Link,
   Divider,
-  LinearProgress
+  LinearProgress,
+  Fade,
+  Slide,
+  Grow,
+  Zoom
 } from '@mui/material';
 import {
   Visibility,
@@ -180,12 +184,18 @@ const RegisterPage = ({ onSwitchToLogin }) => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #1E1E2F 0%, #2A2A3E 50%, #1E1E2F 100%)',
-        padding: 2,
-        position: 'relative'
+        background: `
+          linear-gradient(135deg, #1E1E2F 0%, #2A2A3E 50%, #1E1E2F 100%),
+          linear-gradient(45deg, #6C63FF 0%, #00D2FF 50%, #FFD166 100%)
+        `,
+        backgroundSize: '100% 100%, 200% 200%',
+        animation: 'gradientShift 15s ease-in-out infinite',
+        padding: { xs: 1, sm: 2, md: 3 },
+        position: 'relative',
+        overflow: 'hidden'
       }}
     >
-      {/* Background decorativo */}
+      {/* Background decorativo com animação */}
       <Box
         sx={{
           position: 'absolute',
@@ -194,266 +204,745 @@ const RegisterPage = ({ onSwitchToLogin }) => {
           right: 0,
           bottom: 0,
           background: `
-            radial-gradient(circle at 20% 80%, rgba(108, 99, 255, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(0, 210, 255, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(255, 209, 102, 0.05) 0%, transparent 50%)
+            radial-gradient(circle at 20% 80%, rgba(108, 99, 255, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(0, 210, 255, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(255, 209, 102, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 60% 60%, rgba(255, 107, 107, 0.05) 0%, transparent 50%)
           `,
+          backgroundSize: '100% 100%, 100% 100%, 100% 100%, 100% 100%',
+          animation: 'gradientShift 20s ease-in-out infinite',
           zIndex: 0
         }}
       />
-
-      <Paper
-        elevation={0}
+      
+      {/* Partículas flutuantes */}
+      <Box
         sx={{
-          width: '100%',
-          maxWidth: 450,
-          p: 4,
-          background: 'rgba(30, 30, 47, 0.8)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          borderRadius: 3,
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-          position: 'relative',
-          zIndex: 1,
-          animation: 'fadeIn 0.6s ease-out'
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 0,
+          '&::before, &::after, & > div': {
+            content: '""',
+            position: 'absolute',
+            width: 6,
+            height: 6,
+            background: 'rgba(108, 99, 255, 0.4)',
+            borderRadius: '50%',
+            animation: 'float 8s ease-in-out infinite'
+          },
+          '&::before': {
+            top: '15%',
+            left: '10%',
+            animationDelay: '0s'
+          },
+          '&::after': {
+            top: '70%',
+            right: '20%',
+            animationDelay: '4s',
+            background: 'rgba(0, 210, 255, 0.4)',
+            width: 4,
+            height: 4
+          }
         }}
       >
-        {/* Header */}
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '30%',
+            right: '15%',
+            width: 3,
+            height: 3,
+            background: 'rgba(255, 209, 102, 0.5)',
+            borderRadius: '50%',
+            animation: 'float 6s ease-in-out infinite',
+            animationDelay: '2s'
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '60%',
+            left: '20%',
+            width: 5,
+            height: 5,
+            background: 'rgba(255, 107, 107, 0.3)',
+            borderRadius: '50%',
+            animation: 'float 10s ease-in-out infinite',
+            animationDelay: '6s'
+          }}
+        />
+      </Box>
+
+      <Fade in timeout={800}>
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: { xs: '100%', sm: 1000, md: 1100 },
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            background: 'rgba(30, 30, 47, 0.9)',
+            backdropFilter: 'blur(25px)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            borderRadius: 4,
+            boxShadow: `
+              0 12px 40px rgba(0, 0, 0, 0.4),
+              0 4px 12px rgba(0, 0, 0, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.1)
+            `,
+            position: 'relative',
+            zIndex: 1,
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg)',
+            overflow: 'hidden',
+            '&:hover': {
+              transform: 'perspective(1000px) rotateX(1deg) rotateY(-0.5deg) translateY(-2px)',
+              boxShadow: `
+                0 20px 60px rgba(0, 0, 0, 0.5),
+                0 8px 20px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+                0 0 40px rgba(108, 99, 255, 0.2)
+              `
+            },
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: '-100%',
+              width: '100%',
+              height: '100%',
+              background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent)',
+              animation: 'shimmer 4s ease-in-out infinite'
+            }
+          }}
+        >
+          {/* Seção Esquerda - Informações/Branding */}
           <Box
             sx={{
-              width: 60,
-              height: 60,
-              borderRadius: 2,
-              background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
+              flex: { xs: 'none', md: '1' },
+              background: `
+                linear-gradient(135deg, rgba(108, 99, 255, 0.1) 0%, rgba(0, 210, 255, 0.1) 100%),
+                radial-gradient(circle at 30% 70%, rgba(108, 99, 255, 0.2) 0%, transparent 50%)
+              `,
+              p: { xs: 3, md: 5 },
               display: 'flex',
-              alignItems: 'center',
+              flexDirection: 'column',
               justifyContent: 'center',
-              margin: '0 auto 16px',
-              boxShadow: '0 8px 32px rgba(108, 99, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-              animation: 'glow 3s ease-in-out infinite'
+              alignItems: 'center',
+              textAlign: 'center',
+              position: 'relative',
+              minHeight: { xs: 'auto', md: 600 }
             }}
           >
-            <RegisterIcon sx={{ color: 'white', fontSize: 28 }} />
-          </Box>
-          
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-              background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              mb: 1
-            }}
-          >
-            Criar conta
-          </Typography>
-          
-          <Typography variant="body2" sx={{ color: '#B8B8CC' }}>
-            Comece a calcular limites de forma personalizada
-          </Typography>
-        </Box>
+            {/* Ícone principal */}
+            <Zoom in timeout={1000}>
+              <Box
+                sx={{
+                  width: 100,
+                  height: 100,
+                  borderRadius: 4,
+                  background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 24px',
+                  boxShadow: `
+                    0 16px 50px rgba(108, 99, 255, 0.5),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3)
+                  `,
+                  animation: 'glow 4s ease-in-out infinite',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'scale(1.05) rotate(5deg)',
+                    boxShadow: `
+                      0 20px 60px rgba(108, 99, 255, 0.6),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.4)
+                    `
+                  }
+                }}
+              >
+                <RegisterIcon sx={{ 
+                  color: 'white', 
+                  fontSize: 48,
+                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))'
+                }} />
+              </Box>
+            </Zoom>
+            
+            {/* Título principal */}
+            <Slide direction="right" in timeout={1200}>
+              <Typography
+                variant="h3"
+                sx={{
+                  fontWeight: 700,
+                  background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 2,
+                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                  letterSpacing: '-0.02em'
+                }}
+              >
+                Criar conta
+              </Typography>
+            </Slide>
+            
+            {/* Subtítulo */}
+            <Fade in timeout={1400}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  color: '#B8B8CC',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                  fontWeight: 400,
+                  letterSpacing: '0.01em',
+                  mb: 3,
+                  maxWidth: 300
+                }}
+              >
+                Comece a calcular limites de forma personalizada
+              </Typography>
+            </Fade>
 
-        {/* Formulário */}
-        <Box component="form" onSubmit={handleSubmit}>
-          {/* Nome */}
-          <TextField
-            fullWidth
-            name="name"
-            type="text"
-            label="Nome completo"
-            value={formData.name}
-            onChange={handleChange}
-            error={!!validationErrors.name}
-            helperText={validationErrors.name}
-            disabled={loading || isSubmitting}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PersonIcon sx={{ color: '#6C63FF' }} />
-                </InputAdornment>
-              )
+            {/* Informações adicionais */}
+            <Fade in timeout={1600}>
+              <Box sx={{ mt: 4 }}>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: '#8B8B9E',
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                    fontWeight: 400,
+                    letterSpacing: '0.02em',
+                    lineHeight: 1.6
+                  }}
+                >
+                  Calculadora de Limites • Cálculo Diferencial e Integral
+                </Typography>
+              </Box>
+            </Fade>
+          </Box>
+
+          {/* Seção Direita - Formulário */}
+          <Box
+            sx={{
+              flex: { xs: 'none', md: '1' },
+              p: { xs: 3, md: 5 },
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              minHeight: { xs: 'auto', md: 600 }
             }}
-            sx={{ mb: 3 }}
-          />
+          >
+            {/* Título do formulário */}
+            <Fade in timeout={1800}>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 600,
+                  color: '#FFFFFF',
+                  mb: 3,
+                  textAlign: 'center',
+                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                  letterSpacing: '-0.01em'
+                }}
+              >
+                Preencha seus dados
+              </Typography>
+            </Fade>
+
+            {/* Formulário */}
+            <Box component="form" onSubmit={handleSubmit}>
+          {/* Nome */}
+          <Slide direction="right" in timeout={2000}>
+            <TextField
+              fullWidth
+              name="name"
+              type="text"
+              label="Nome completo"
+              value={formData.name}
+              onChange={handleChange}
+              error={!!validationErrors.name}
+              helperText={validationErrors.name}
+              disabled={loading || isSubmitting}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonIcon sx={{ 
+                      color: '#6C63FF',
+                      filter: 'drop-shadow(0 2px 4px rgba(108, 99, 255, 0.3))'
+                    }} />
+                  </InputAdornment>
+                )
+              }}
+              sx={{ 
+                mb: 3,
+                '& .MuiOutlinedInput-root': {
+                  background: 'rgba(30, 30, 47, 0.6)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: 3,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: 'rgba(30, 30, 47, 0.8)',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#6C63FF',
+                      boxShadow: '0 0 0 2px rgba(108, 99, 255, 0.2)'
+                    }
+                  },
+                  '&.Mui-focused': {
+                    background: 'rgba(30, 30, 47, 0.9)',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#6C63FF',
+                      borderWidth: 2,
+                      boxShadow: '0 0 0 4px rgba(108, 99, 255, 0.2)'
+                    }
+                  }
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#B8B8CC',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                  '&.Mui-focused': {
+                    color: '#6C63FF'
+                  }
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                  borderWidth: 1
+                },
+                '& .MuiInputBase-input': {
+                  color: '#FFFFFF',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                  '&::placeholder': {
+                    color: '#8B8B9E',
+                    opacity: 1
+                  }
+                }
+              }}
+            />
+          </Slide>
 
           {/* Email */}
-          <TextField
-            fullWidth
-            name="email"
-            type="email"
-            label="Email"
-            value={formData.email}
-            onChange={handleChange}
-            error={!!validationErrors.email}
-            helperText={validationErrors.email}
-            disabled={loading || isSubmitting}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <EmailIcon sx={{ color: '#6C63FF' }} />
-                </InputAdornment>
-              )
-            }}
-            sx={{ mb: 3 }}
-          />
+          <Slide direction="right" in timeout={2200}>
+            <TextField
+              fullWidth
+              name="email"
+              type="email"
+              label="Email"
+              value={formData.email}
+              onChange={handleChange}
+              error={!!validationErrors.email}
+              helperText={validationErrors.email}
+              disabled={loading || isSubmitting}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailIcon sx={{ 
+                      color: '#6C63FF',
+                      filter: 'drop-shadow(0 2px 4px rgba(108, 99, 255, 0.3))'
+                    }} />
+                  </InputAdornment>
+                )
+              }}
+              sx={{ 
+                mb: 3,
+                '& .MuiOutlinedInput-root': {
+                  background: 'rgba(30, 30, 47, 0.6)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: 3,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: 'rgba(30, 30, 47, 0.8)',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#6C63FF',
+                      boxShadow: '0 0 0 2px rgba(108, 99, 255, 0.2)'
+                    }
+                  },
+                  '&.Mui-focused': {
+                    background: 'rgba(30, 30, 47, 0.9)',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#6C63FF',
+                      borderWidth: 2,
+                      boxShadow: '0 0 0 4px rgba(108, 99, 255, 0.2)'
+                    }
+                  }
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#B8B8CC',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                  '&.Mui-focused': {
+                    color: '#6C63FF'
+                  }
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                  borderWidth: 1
+                },
+                '& .MuiInputBase-input': {
+                  color: '#FFFFFF',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                  '&::placeholder': {
+                    color: '#8B8B9E',
+                    opacity: 1
+                  }
+                }
+              }}
+            />
+          </Slide>
 
           {/* Senha */}
-          <TextField
-            fullWidth
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            label="Senha"
-            value={formData.password}
-            onChange={handleChange}
-            error={!!validationErrors.password}
-            helperText={validationErrors.password}
-            disabled={loading || isSubmitting}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LockIcon sx={{ color: '#6C63FF' }} />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={togglePasswordVisibility}
-                    edge="end"
-                    disabled={loading || isSubmitting}
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              )
-            }}
-            sx={{ mb: 2 }}
-          />
+          <Slide direction="right" in timeout={2400}>
+            <TextField
+              fullWidth
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              label="Senha"
+              value={formData.password}
+              onChange={handleChange}
+              error={!!validationErrors.password}
+              helperText={validationErrors.password}
+              disabled={loading || isSubmitting}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon sx={{ 
+                      color: '#6C63FF',
+                      filter: 'drop-shadow(0 2px 4px rgba(108, 99, 255, 0.3))'
+                    }} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={togglePasswordVisibility}
+                      edge="end"
+                      disabled={loading || isSubmitting}
+                      sx={{
+                        color: '#6C63FF',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          background: 'rgba(108, 99, 255, 0.1)',
+                          transform: 'scale(1.1)'
+                        }
+                      }}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
+              sx={{ 
+                mb: 2,
+                '& .MuiOutlinedInput-root': {
+                  background: 'rgba(30, 30, 47, 0.6)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: 3,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: 'rgba(30, 30, 47, 0.8)',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#6C63FF',
+                      boxShadow: '0 0 0 2px rgba(108, 99, 255, 0.2)'
+                    }
+                  },
+                  '&.Mui-focused': {
+                    background: 'rgba(30, 30, 47, 0.9)',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#6C63FF',
+                      borderWidth: 2,
+                      boxShadow: '0 0 0 4px rgba(108, 99, 255, 0.2)'
+                    }
+                  }
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#B8B8CC',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                  '&.Mui-focused': {
+                    color: '#6C63FF'
+                  }
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                  borderWidth: 1
+                },
+                '& .MuiInputBase-input': {
+                  color: '#FFFFFF',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                  '&::placeholder': {
+                    color: '#8B8B9E',
+                    opacity: 1
+                  }
+                }
+              }}
+            />
+          </Slide>
 
           {/* Indicador de força da senha */}
           {formData.password && (
-            <Box sx={{ mb: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Typography variant="caption" sx={{ color: '#B8B8CC' }}>
-                  Força da senha:
-                </Typography>
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    color: passwordStrength.color,
-                    fontWeight: 600
+            <Fade in timeout={100}>
+              <Box sx={{ mb: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      color: '#B8B8CC',
+                      textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                      fontWeight: 500
+                    }}
+                  >
+                    Força da senha:
+                  </Typography>
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      color: passwordStrength.color,
+                      fontWeight: 600,
+                      textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)'
+                    }}
+                  >
+                    {passwordStrength.label}
+                  </Typography>
+                </Box>
+                <LinearProgress
+                  variant="determinate"
+                  value={(passwordStrength.score / 5) * 100}
+                  sx={{
+                    height: 6,
+                    borderRadius: 3,
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    '& .MuiLinearProgress-bar': {
+                      background: `linear-gradient(90deg, ${passwordStrength.color} 0%, ${passwordStrength.color}CC 100%)`,
+                      borderRadius: 3,
+                      boxShadow: `0 0 10px ${passwordStrength.color}40`
+                    }
                   }}
-                >
-                  {passwordStrength.label}
-                </Typography>
+                />
               </Box>
-              <LinearProgress
-                variant="determinate"
-                value={(passwordStrength.score / 5) * 100}
-                sx={{
-                  height: 4,
-                  borderRadius: 2,
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  '& .MuiLinearProgress-bar': {
-                    backgroundColor: passwordStrength.color,
-                    borderRadius: 2
-                  }
-                }}
-              />
-            </Box>
+            </Fade>
           )}
 
           {/* Confirmar Senha */}
-          <TextField
-            fullWidth
-            name="confirmPassword"
-            type={showConfirmPassword ? 'text' : 'password'}
-            label="Confirmar senha"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            error={!!validationErrors.confirmPassword}
-            helperText={validationErrors.confirmPassword}
-            disabled={loading || isSubmitting}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LockIcon sx={{ color: '#6C63FF' }} />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={toggleConfirmPasswordVisibility}
-                    edge="end"
-                    disabled={loading || isSubmitting}
-                  >
-                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              )
-            }}
-            sx={{ mb: 3 }}
-          />
+          <Slide direction="right" in timeout={2600}>
+            <TextField
+              fullWidth
+              name="confirmPassword"
+              type={showConfirmPassword ? 'text' : 'password'}
+              label="Confirmar senha"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              error={!!validationErrors.confirmPassword}
+              helperText={validationErrors.confirmPassword}
+              disabled={loading || isSubmitting}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon sx={{ 
+                      color: '#6C63FF',
+                      filter: 'drop-shadow(0 2px 4px rgba(108, 99, 255, 0.3))'
+                    }} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={toggleConfirmPasswordVisibility}
+                      edge="end"
+                      disabled={loading || isSubmitting}
+                      sx={{
+                        color: '#6C63FF',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          background: 'rgba(108, 99, 255, 0.1)',
+                          transform: 'scale(1.1)'
+                        }
+                      }}
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
+              sx={{ 
+                mb: 3,
+                '& .MuiOutlinedInput-root': {
+                  background: 'rgba(30, 30, 47, 0.6)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: 3,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: 'rgba(30, 30, 47, 0.8)',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#6C63FF',
+                      boxShadow: '0 0 0 2px rgba(108, 99, 255, 0.2)'
+                    }
+                  },
+                  '&.Mui-focused': {
+                    background: 'rgba(30, 30, 47, 0.9)',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#6C63FF',
+                      borderWidth: 2,
+                      boxShadow: '0 0 0 4px rgba(108, 99, 255, 0.2)'
+                    }
+                  }
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#B8B8CC',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                  '&.Mui-focused': {
+                    color: '#6C63FF'
+                  }
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                  borderWidth: 1
+                },
+                '& .MuiInputBase-input': {
+                  color: '#FFFFFF',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                  '&::placeholder': {
+                    color: '#8B8B9E',
+                    opacity: 1
+                  }
+                }
+              }}
+            />
+          </Slide>
 
           {/* Erro geral */}
           {error && (
-            <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-              {error}
-            </Alert>
+            <Grow in timeout={100}>
+              <Alert 
+                severity="error" 
+                sx={{ 
+                  mb: 3, 
+                  borderRadius: 3,
+                  background: 'rgba(244, 67, 54, 0.1)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(244, 67, 54, 0.3)',
+                  color: '#FF6B6B',
+                  '& .MuiAlert-icon': {
+                    color: '#FF6B6B'
+                  }
+                }}
+              >
+                {error}
+              </Alert>
+            </Grow>
           )}
 
           {/* Botão de registro */}
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            size="large"
-            disabled={!isFormValid || loading || isSubmitting}
-            startIcon={isSubmitting ? <CircularProgress size={20} /> : <RegisterIcon />}
-            sx={{
-              mb: 3,
-              py: 1.5,
-              fontSize: '1rem',
-              fontWeight: 600
-            }}
-          >
-            {isSubmitting ? 'Criando conta...' : 'Criar conta'}
-          </Button>
+          <Grow in timeout={2800}>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              size="large"
+              disabled={!isFormValid || loading || isSubmitting}
+              startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <RegisterIcon />}
+              sx={{
+                mb: 3,
+                py: 2,
+                fontSize: '1.1rem',
+                fontWeight: 600,
+                background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
+                boxShadow: '0 8px 25px rgba(108, 99, 255, 0.4)',
+                borderRadius: 3,
+                textTransform: 'none',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5A52E5 0%, #00B8E6 100%)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 12px 35px rgba(108, 99, 255, 0.6)'
+                },
+                '&:active': {
+                  transform: 'translateY(0px)'
+                },
+                '&:disabled': {
+                  background: 'rgba(108, 99, 255, 0.3)',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  transform: 'none',
+                  boxShadow: 'none'
+                }
+              }}
+            >
+              {isSubmitting ? 'Criando conta...' : 'Criar conta'}
+            </Button>
+          </Grow>
 
           {/* Divisor */}
-          <Divider sx={{ mb: 3, '&::before, &::after': { borderColor: 'rgba(255, 255, 255, 0.1)' } }}>
-            <Typography variant="body2" sx={{ color: '#8B8B9E', px: 2 }}>
-              ou
-            </Typography>
-          </Divider>
+          <Fade in timeout={3000}>
+            <Divider 
+              sx={{ 
+                mb: 3, 
+                '&::before, &::after': { 
+                  borderColor: 'rgba(255, 255, 255, 0.15)',
+                  borderWidth: 1
+                } 
+              }}
+            >
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: '#8B8B9E', 
+                  px: 2,
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                  fontWeight: 500
+                }}
+              >
+                ou
+              </Typography>
+            </Divider>
+          </Fade>
 
           {/* Link para login */}
-          <Button
-            fullWidth
-            variant="outlined"
-            size="large"
-            startIcon={<LoginIcon />}
-            onClick={onSwitchToLogin}
-            disabled={loading || isSubmitting}
-            sx={{
-              py: 1.5,
-              fontSize: '1rem',
-              fontWeight: 600
-            }}
-          >
-            Já tenho uma conta
-          </Button>
+          <Grow in timeout={3200}>
+            <Button
+              fullWidth
+              variant="outlined"
+              size="large"
+              startIcon={<LoginIcon />}
+              onClick={onSwitchToLogin}
+              disabled={loading || isSubmitting}
+              sx={{
+                py: 2,
+                fontSize: '1.1rem',
+                fontWeight: 600,
+                background: 'rgba(30, 30, 47, 0.6)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: 3,
+                textTransform: 'none',
+                color: '#FFFFFF',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  background: 'rgba(30, 30, 47, 0.8)',
+                  borderColor: '#6C63FF',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 25px rgba(108, 99, 255, 0.2)'
+                },
+                '&:active': {
+                  transform: 'translateY(0px)'
+                },
+                '&:disabled': {
+                  background: 'rgba(30, 30, 47, 0.3)',
+                  color: 'rgba(255, 255, 255, 0.3)',
+                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                  transform: 'none',
+                  boxShadow: 'none'
+                }
+              }}
+            >
+              Já tenho uma conta
+            </Button>
+          </Grow>
+            </Box>
+          </Box>
         </Box>
-
-        {/* Footer */}
-        <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Typography variant="caption" sx={{ color: '#8B8B9E' }}>
-            Calculadora de Limites • Cálculo Diferencial e Integral
-          </Typography>
-        </Box>
-      </Paper>
+      </Fade>
     </Box>
   );
 };
