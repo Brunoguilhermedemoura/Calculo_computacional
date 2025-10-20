@@ -1,5 +1,6 @@
 /**
  * Componente principal da calculadora de limites
+ * Interface premium com efeitos visuais avançados
  */
 
 import React from 'react';
@@ -13,7 +14,11 @@ import {
   Tooltip,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  Fade,
+  Slide,
+  Grow,
+  Zoom
 } from '@mui/material';
 import {
   Refresh,
@@ -111,205 +116,383 @@ const Calculator = ({ onLogout }) => {
   // Removido: função de teste
 
   return (
-    <CustomScrollbar 
-      maxHeight="100vh" 
-      variant="dark" 
-      width="14px"
-      sx={{ 
-        minHeight: '100vh', 
-        margin: 0, 
-        padding: 0,
-        position: 'relative'
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: `
+          linear-gradient(135deg, #1E1E2F 0%, #2A2A3E 50%, #1E1E2F 100%),
+          linear-gradient(45deg, #6C63FF 0%, #00D2FF 50%, #FFD166 100%)
+        `,
+        backgroundSize: '100% 100%, 200% 200%',
+        animation: 'gradientShift 20s ease-in-out infinite',
+        position: 'relative',
+        overflow: 'hidden'
       }}
     >
-      {/* Header com animação */}
-      <div className="animate-slide-in">
-        <AppBar position="static" elevation={0} className="animate-slide-in">
-        <Toolbar sx={{ py: 1.5 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexGrow: 1 }}>
-            <Box sx={{ 
-              width: 45, 
-              height: 45, 
-              borderRadius: 12, 
-              background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontWeight: 'bold',
-              fontSize: '1.3rem',
-              boxShadow: '0 8px 32px rgba(108, 99, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-              animation: 'glow 3s ease-in-out infinite'
-            }}>
-              ∫
-            </Box>
-            <Box>
-              <Typography variant="h5" component="div" sx={{ 
-                fontWeight: 700,
-                background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                lineHeight: 1.2
-              }}>
-                Calculadora de Limites
-              </Typography>
-              <Typography variant="body2" sx={{ 
-                color: '#B8B8CC',
-                fontWeight: 500,
-                fontSize: '0.9rem'
-              }}>
-                Cálculo Diferencial e Integral • UNO
-              </Typography>
-            </Box>
-          </Box>
-          
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Tooltip title="Resetar Calculadora">
-              <IconButton 
-                color="inherit" 
-                onClick={handleReset}
-                sx={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  '&:hover': {
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    transform: 'scale(1.1)'
-                  },
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                <Refresh />
-              </IconButton>
-            </Tooltip>
-            
-            <Tooltip title="Sobre">
-              <IconButton 
-                color="inherit"
-                sx={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  '&:hover': {
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    transform: 'scale(1.1)'
-                  },
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                <Info />
-              </IconButton>
-            </Tooltip>
+      {/* Background decorativo com animação */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `
+            radial-gradient(circle at 20% 80%, rgba(108, 99, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(0, 210, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(255, 209, 102, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 60% 60%, rgba(255, 107, 107, 0.03) 0%, transparent 50%)
+          `,
+          backgroundSize: '100% 100%, 100% 100%, 100% 100%, 100% 100%',
+          animation: 'gradientShift 25s ease-in-out infinite',
+          zIndex: 0
+        }}
+      />
+      
+      {/* Partículas flutuantes */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 0,
+          '&::before, &::after, & > div': {
+            content: '""',
+            position: 'absolute',
+            width: 4,
+            height: 4,
+            background: 'rgba(108, 99, 255, 0.3)',
+            borderRadius: '50%',
+            animation: 'float 10s ease-in-out infinite'
+          },
+          '&::before': {
+            top: '10%',
+            left: '5%',
+            animationDelay: '0s'
+          },
+          '&::after': {
+            top: '80%',
+            right: '10%',
+            animationDelay: '5s',
+            background: 'rgba(0, 210, 255, 0.3)',
+            width: 3,
+            height: 3
+          }
+        }}
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '40%',
+            right: '5%',
+            width: 2,
+            height: 2,
+            background: 'rgba(255, 209, 102, 0.4)',
+            borderRadius: '50%',
+            animation: 'float 8s ease-in-out infinite',
+            animationDelay: '2.5s'
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '70%',
+            left: '10%',
+            width: 3,
+            height: 3,
+            background: 'rgba(255, 107, 107, 0.2)',
+            borderRadius: '50%',
+            animation: 'float 12s ease-in-out infinite',
+            animationDelay: '7s'
+          }}
+        />
+      </Box>
 
-            {/* Perfil do usuário */}
-            <UserProfile onLogout={onLogout} />
-          </Box>
-        </Toolbar>
-      </AppBar>
-      </div>
+      <CustomScrollbar 
+        maxHeight="100vh" 
+        variant="dark" 
+        width="14px"
+        sx={{ 
+          minHeight: '100vh', 
+          margin: 0, 
+          padding: 0,
+          position: 'relative',
+          zIndex: 1
+        }}
+      >
+      {/* Header com animação */}
+      <Slide direction="down" in timeout={800}>
+        <AppBar 
+          position="static" 
+          elevation={0}
+          sx={{
+            background: 'rgba(30, 30, 47, 0.95)',
+            backdropFilter: 'blur(25px)',
+            borderBottom: '1px solid rgba(108, 99, 255, 0.3)',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 1,
+              background: 'linear-gradient(90deg, transparent 0%, #6C63FF 50%, transparent 100%)',
+              opacity: 0.6
+            }
+          }}
+        >
+          <Toolbar sx={{ py: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexGrow: 1 }}>
+              <Zoom in timeout={1000}>
+                <Box sx={{ 
+                  width: 52, 
+                  height: 52, 
+                  borderRadius: 3, 
+                  background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: '1.5rem',
+                  boxShadow: `
+                    0 12px 40px rgba(108, 99, 255, 0.5),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3)
+                  `,
+                  animation: 'glow 4s ease-in-out infinite',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'scale(1.05) rotate(5deg)',
+                    boxShadow: `
+                      0 16px 50px rgba(108, 99, 255, 0.6),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.4)
+                    `
+                  }
+                }}>
+                  ∫
+                </Box>
+              </Zoom>
+              
+              <Fade in timeout={1200}>
+                <Box>
+                  <Typography variant="h5" component="div" sx={{ 
+                    fontWeight: 700,
+                    background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    lineHeight: 1.2,
+                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                    letterSpacing: '-0.01em'
+                  }}>
+                    Calculadora de Limites
+                  </Typography>
+                  <Typography variant="body2" sx={{ 
+                    color: '#B8B8CC',
+                    fontWeight: 500,
+                    fontSize: '0.9rem',
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                    letterSpacing: '0.01em'
+                  }}>
+                    Cálculo Diferencial e Integral • UNO
+                  </Typography>
+                </Box>
+              </Fade>
+            </Box>
+            
+            <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+              <Tooltip title="Resetar Calculadora" arrow>
+                <IconButton 
+                  color="inherit" 
+                  onClick={handleReset}
+                  sx={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    width: 48,
+                    height: 48,
+                    '&:hover': {
+                      background: 'rgba(255, 255, 255, 0.2)',
+                      transform: 'scale(1.1) rotate(5deg)',
+                      boxShadow: '0 8px 25px rgba(255, 255, 255, 0.2)'
+                    },
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}
+                >
+                  <Refresh sx={{ color: '#FFFFFF' }} />
+                </IconButton>
+              </Tooltip>
+              
+              <Tooltip title="Sobre" arrow>
+                <IconButton 
+                  color="inherit"
+                  sx={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    width: 48,
+                    height: 48,
+                    '&:hover': {
+                      background: 'rgba(255, 255, 255, 0.2)',
+                      transform: 'scale(1.1) rotate(5deg)',
+                      boxShadow: '0 8px 25px rgba(255, 255, 255, 0.2)'
+                    },
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}
+                >
+                  <Info sx={{ color: '#FFFFFF' }} />
+                </IconButton>
+              </Tooltip>
+
+              {/* Perfil do usuário */}
+              <UserProfile onLogout={onLogout} />
+            </Box>
+          </Toolbar>
+        </AppBar>
+      </Slide>
 
       {/* Conteúdo Principal */}
-      <Box sx={{ py: 1, px: 0, width: '100%', margin: 0 }}>
+      <Box sx={{ py: 2, px: 0, width: '100%', margin: 0 }}>
         {/* Layout principal responsivo */}
-        <Box className="grid-container" sx={{ 
-          display: 'grid',
-          gridTemplateColumns: { 
-            xs: '1fr', 
-            md: '450px 1fr', 
-            lg: '450px 1fr 400px',
-            xl: '480px 1fr 420px' 
-          },
-          gap: 3,
-          width: '100%',
-          minHeight: 'calc(100vh - 120px)',
-          margin: 0,
-          padding: { xs: 2, md: 3 }
-        }}>
+        <Fade in timeout={1400}>
+          <Box className="grid-container" sx={{ 
+            display: 'grid',
+            gridTemplateColumns: { 
+              xs: '1fr', 
+              md: '450px 1fr', 
+              lg: '450px 1fr 400px',
+              xl: '480px 1fr 420px' 
+            },
+            gap: 4,
+            width: '100%',
+            minHeight: 'calc(100vh - 120px)',
+            margin: 0,
+            padding: { xs: 2, md: 3, lg: 4 }
+          }}>
           {/* Coluna da Esquerda - Entrada com animação */}
-          <div className="animate-slide-in" style={{ animationDelay: '0.2s' }}>
+          <Slide direction="right" in timeout={1600}>
             <Box sx={{ 
               display: 'flex',
               flexDirection: 'column',
               height: 'fit-content',
               position: { md: 'sticky' },
               top: 20,
-              className: 'animate-slide-in'
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-2px)'
+              }
             }}>
-            <InputSection
-              functionValue={functionValue}
-              setFunctionValue={setFunctionValue}
-              limitPoint={limitPoint}
-              setLimitPoint={setLimitPoint}
-              direction={direction}
-              setDirection={setDirection}
-              onCalculate={handleCalculate}
-              onExamples={handleExamples}
-              onHelp={handleHelp}
-              onGraph={handleGraph}
-              isCalculating={isCalculating}
-              validation={validation}
-              suggestions={suggestions}
-              onAutoCorrect={handleAutoCorrect}
-              history={history}
-              onClearHistory={clearHistory}
-            />
+              <InputSection
+                functionValue={functionValue}
+                setFunctionValue={setFunctionValue}
+                limitPoint={limitPoint}
+                setLimitPoint={setLimitPoint}
+                direction={direction}
+                setDirection={setDirection}
+                onCalculate={handleCalculate}
+                onExamples={handleExamples}
+                onHelp={handleHelp}
+                onGraph={handleGraph}
+                isCalculating={isCalculating}
+                validation={validation}
+                suggestions={suggestions}
+                onAutoCorrect={handleAutoCorrect}
+                history={history}
+                onClearHistory={clearHistory}
+              />
             </Box>
-          </div>
+          </Slide>
 
           {/* Coluna Central - Resultados com animação */}
-          <div className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          <Fade in timeout={1800}>
             <Box sx={{ 
               display: 'flex',
               flexDirection: 'column',
               minHeight: 'calc(100vh - 120px)',
               overflow: 'hidden',
-              className: 'animate-fade-in'
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-2px)'
+              }
             }}>
-            <ResultSection
-              result={result}
-              steps={steps}
-              tips={tips}
-              strategy={strategy}
-              form={form}
-              formInfo={formInfo}
-              strategyInfo={strategyInfo}
-              isCalculating={isCalculating}
-              showStrategyDetails={showStrategyDetails}
-              showStepDetails={showStepDetails}
-              currentStep={currentStep}
-              onToggleStrategyDetails={toggleStrategyDetails}
-              onToggleStepDetails={toggleStepDetails}
-              onStepClick={handleStepClick}
-            />
+              <ResultSection
+                result={result}
+                steps={steps}
+                tips={tips}
+                strategy={strategy}
+                form={form}
+                formInfo={formInfo}
+                strategyInfo={strategyInfo}
+                isCalculating={isCalculating}
+                showStrategyDetails={showStrategyDetails}
+                showStepDetails={showStepDetails}
+                currentStep={currentStep}
+                onToggleStrategyDetails={toggleStrategyDetails}
+                onToggleStepDetails={toggleStepDetails}
+                onStepClick={handleStepClick}
+              />
             </Box>
-          </div>
+          </Fade>
 
           {/* Coluna da Direita - Gráficos com animação */}
-          <div className="animate-scale-in" style={{ animationDelay: '0.6s' }}>
+          <Grow in timeout={2000}>
             <Box sx={{ 
               display: { xs: 'none', lg: 'flex' },
               flexDirection: 'column',
               gap: 3,
-              className: 'animate-scale-in'
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-2px)'
+              }
             }}>
             {/* Teste do Plotly em Accordion */}
             <Accordion sx={{
-              background: 'rgba(30, 30, 47, 0.8)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '16px !important',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+              background: 'rgba(30, 30, 47, 0.9)',
+              backdropFilter: 'blur(25px)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              borderRadius: '20px !important',
+              boxShadow: `
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                0 4px 12px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1)
+              `,
               '&:before': { display: 'none' },
-              '&.Mui-expanded': { margin: 0 }
+              '&.Mui-expanded': { margin: 0 },
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: `
+                  0 16px 50px rgba(0, 0, 0, 0.5),
+                  0 8px 20px rgba(0, 0, 0, 0.3),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.2)
+                `
+              }
             }}>
               <AccordionSummary
-                expandIcon={<ExpandMore sx={{ color: '#6C63FF' }} />}
+                expandIcon={<ExpandMore sx={{ 
+                  color: '#6C63FF',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'rotate(180deg)'
+                  }
+                }} />}
                 sx={{ 
-                  borderRadius: '16px 16px 0 0',
-                  '&.Mui-expanded': { minHeight: 'auto' }
+                  borderRadius: '20px 20px 0 0',
+                  '&.Mui-expanded': { minHeight: 'auto' },
+                  '&:hover': {
+                    background: 'rgba(108, 99, 255, 0.05)'
+                  }
                 }}
               >
                 <Typography variant="h6" sx={{ 
                   color: '#6C63FF', 
                   fontWeight: 600,
-                  fontSize: '0.95rem'
+                  fontSize: '0.95rem',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                  letterSpacing: '0.01em'
                 }}>
                   🔧 Status do Sistema
                 </Typography>
@@ -322,12 +505,25 @@ const Calculator = ({ onLogout }) => {
             {/* Gráfico em tempo real */}
             <Box sx={{
               p: 3,
-              background: 'rgba(30, 30, 47, 0.8)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: 16,
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-              height: 'fit-content'
+              background: 'rgba(30, 30, 47, 0.9)',
+              backdropFilter: 'blur(25px)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              borderRadius: 20,
+              boxShadow: `
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                0 4px 12px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1)
+              `,
+              height: 'fit-content',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: `
+                  0 16px 50px rgba(0, 0, 0, 0.5),
+                  0 8px 20px rgba(0, 0, 0, 0.3),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.2)
+                `
+              }
             }}>
               <Typography variant="h6" sx={{ 
                 color: '#6C63FF', 
@@ -336,7 +532,9 @@ const Calculator = ({ onLogout }) => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
-                fontSize: '1rem'
+                fontSize: '1rem',
+                textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                letterSpacing: '0.01em'
               }}>
                 📊 Visualização
               </Typography>
@@ -346,9 +544,11 @@ const Calculator = ({ onLogout }) => {
                   height: 400, 
                   width: '100%',
                   minHeight: '400px',
-                  background: 'rgba(0, 0, 0, 0.2)',
-                  borderRadius: 12,
-                  p: 2
+                  background: 'rgba(0, 0, 0, 0.3)',
+                  borderRadius: 16,
+                  p: 2,
+                  border: '1px solid rgba(108, 99, 255, 0.2)',
+                  boxShadow: 'inset 0 2px 8px rgba(0, 0, 0, 0.2)'
                 }}>
                   <SimpleChart 
                     data={{
@@ -391,50 +591,74 @@ const Calculator = ({ onLogout }) => {
                 </Box>
               ) : (
                 <>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontSize: '0.85rem' }}>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      mb: 2, 
+                      fontSize: '0.85rem',
+                      color: '#B8B8CC',
+                      textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                      fontWeight: 500
+                    }}
+                  >
                     Digite uma função e um ponto limite para ver o gráfico aqui.
                   </Typography>
                   <Box sx={{ 
                     height: 200, 
                     background: 'rgba(108, 99, 255, 0.1)',
-                    borderRadius: 12,
+                    borderRadius: 16,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    border: '2px dashed rgba(108, 99, 255, 0.3)'
+                    border: '2px dashed rgba(108, 99, 255, 0.4)',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      background: 'rgba(108, 99, 255, 0.15)',
+                      borderColor: 'rgba(108, 99, 255, 0.6)'
+                    }
                   }}>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        fontSize: '0.85rem',
+                        color: '#8B8B9E',
+                        textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                        fontWeight: 500
+                      }}
+                    >
                       Gráfico aparecerá aqui
                     </Typography>
                   </Box>
                 </>
               )}
             </Box>
-            </Box>
-          </div>
-        </Box>
+          </Box>
+        </Grow>
+          </Box>
+        </Fade>
 
-        {/* Modais */}
-        <ExamplesModal
-          open={showExamples}
-          onClose={() => setShowExamples(false)}
-          onLoadExample={loadExample}
-        />
+      {/* Modais */}
+      <ExamplesModal
+        open={showExamples}
+        onClose={() => setShowExamples(false)}
+        onLoadExample={loadExample}
+      />
 
-        <HelpModal
-          open={showHelp}
-          onClose={() => setShowHelp(false)}
-        />
+      <HelpModal
+        open={showHelp}
+        onClose={() => setShowHelp(false)}
+      />
 
-        <GraphModal
-          open={showGraph}
-          onClose={() => setShowGraph(false)}
-          functionStr={functionValue}
-          limitPoint={limitPoint}
-        />
+      <GraphModal
+        open={showGraph}
+        onClose={() => setShowGraph(false)}
+        functionStr={functionValue}
+        limitPoint={limitPoint}
+      />
       </Box>
 
-    </CustomScrollbar>
+      </CustomScrollbar>
+    </Box>
   );
 };
 
