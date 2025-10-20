@@ -55,7 +55,9 @@ const InputSection = ({
   error,
   validation,
   suggestions,
-  onAutoCorrect
+  onAutoCorrect,
+  history,
+  onClearHistory
 }) => {
   const [showSyntaxTips, setShowSyntaxTips] = React.useState(false);
   const [showKeyboard, setShowKeyboard] = React.useState(false);
@@ -244,7 +246,11 @@ const InputSection = ({
                     <Keyboard />
                   </IconButton>
                 </Tooltip>
-                <CalculationHistory onLoadCalculation={handleLoadFromHistory} />
+                <CalculationHistory 
+                  history={history}
+                  onLoadCalculation={handleLoadFromHistory}
+                  onClearHistory={onClearHistory}
+                />
               </Box>
             </InputAdornment>
           )

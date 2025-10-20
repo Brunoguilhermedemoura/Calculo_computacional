@@ -21,40 +21,8 @@ import {
   Calculate
 } from '@mui/icons-material';
 
-const CalculationHistory = ({ onLoadCalculation }) => {
+const CalculationHistory = ({ history, onLoadCalculation, onClearHistory }) => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [history, setHistory] = useState([]);
-
-  useEffect(() => {
-    // Carrega histórico do localStorage
-    const savedHistory = localStorage.getItem('calculationHistory');
-    if (savedHistory) {
-      try {
-        setHistory(JSON.parse(savedHistory));
-      } catch (error) {
-        console.error('Erro ao carregar histórico:', error);
-      }
-    }
-  }, []);
-
-  const saveToHistory = (calculation) => {
-    const newHistory = [
-      {
-        id: Date.now(),
-        timestamp: new Date().toLocaleString('pt-BR'),
-        ...calculation
-      },
-      ...history.slice(0, 4) // Mantém apenas os últimos 5
-    ];
-    
-    setHistory(newHistory);
-    localStorage.setItem('calculationHistory', JSON.stringify(newHistory));
-  };
-
-  const clearHistory = () => {
-    setHistory([]);
-    localStorage.removeItem('calculationHistory');
-  };
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -118,7 +86,7 @@ const CalculationHistory = ({ onLoadCalculation }) => {
             </Typography>
             {history.length > 0 && (
               <IconButton
-                onClick={clearHistory}
+                onClick={onClearHistory}
                 size="small"
                 sx={{ color: '#FF6B6B' }}
               >

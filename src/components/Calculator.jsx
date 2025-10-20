@@ -80,7 +80,11 @@ const Calculator = () => {
     handleStepClick,
     
     // Funções utilitárias
-    handleAutoCorrect
+    handleAutoCorrect,
+    
+    // Histórico
+    history,
+    clearHistory
   } = useAdvancedLimits();
 
   const handleExamples = () => {
@@ -234,6 +238,8 @@ const Calculator = () => {
               validation={validation}
               suggestions={suggestions}
               onAutoCorrect={handleAutoCorrect}
+              history={history}
+              onClearHistory={clearHistory}
             />
             </Box>
           </div>

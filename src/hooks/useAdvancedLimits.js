@@ -4,7 +4,6 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { 
-  calculateAdvancedLimit, 
   calculateDetailedLimit,
   validateExpression,
   suggestCorrections,
@@ -45,9 +44,24 @@ export const useAdvancedLimits = () => {
   const [showGraph, setShowGraph] = useState(false);
   const [showSyntaxTips, setShowSyntaxTips] = useState(false);
   
+  // Estado do histórico
+  const [history, setHistory] = useState([]);
+  
   // Referências para controle de animações
   const calculationTimeoutRef = useRef(null);
   const stepAnimationRef = useRef(null);
+
+  // Carregar histórico do localStorage
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('calculationHistory');
+    if (savedHistory) {
+      try {
+        setHistory(JSON.parse(savedHistory));
+      } catch (error) {
+        console.error('Erro ao carregar histórico:', error);
+      }
+    }
+  }, []);
 
   // Validação em tempo real
   useEffect(() => {
@@ -63,6 +77,20 @@ export const useAdvancedLimits = () => {
       setSuggestions([]);
     }
   }, [functionValue]);
+
+  // Função para salvar cálculo no histórico
+  const saveToHistory = useCallback((calculation) => {
+    const newHistory = [
+      {
+        id: Date.now(),
+        timestamp: new Date().toLocaleString('pt-BR'),
+        ...calculation
+      },
+      ...history.slice(0, 4) // Mantém apenas os últimos 5
+    ];
+    setHistory(newHistory);
+    localStorage.setItem('calculationHistory', JSON.stringify(newHistory));
+  }, [history]);
 
   // Função principal de cálculo
   const handleCalculate = useCallback(async () => {
@@ -106,8 +134,26 @@ export const useAdvancedLimits = () => {
       setStrategyInfo(detailedResult.strategyInfo);
       setCalculationResult(detailedResult.calculationResult);
       
-      // Anima os passos
-      animateSteps(detailedResult.steps);
+      // Salva no histórico se o cálculo foi bem-sucedido
+      if (detailedResult.result !== 'Erro') {
+        saveToHistory({
+          function: functionValue,
+          point: limitPoint,
+          direction: direction,
+          result: detailedResult.result
+        });
+      }
+      
+      // Anima os passos sequencialmente
+      let currentIndex = 0;
+      const animateNextStep = () => {
+        if (currentIndex < detailedResult.steps.length) {
+          setCurrentStep(currentIndex);
+          currentIndex++;
+          stepAnimationRef.current = setTimeout(animateNextStep, 800);
+        }
+      };
+      animateNextStep();
       
     } catch (error) {
       setResult('Erro');
@@ -118,22 +164,7 @@ export const useAdvancedLimits = () => {
     } finally {
       setIsCalculating(false);
     }
-  }, [functionValue, limitPoint, direction, validation.valid]);
-
-  // Anima os passos sequencialmente
-  const animateSteps = useCallback((stepsArray) => {
-    let currentIndex = 0;
-    
-    const animateNextStep = () => {
-      if (currentIndex < stepsArray.length) {
-        setCurrentStep(currentIndex);
-        currentIndex++;
-        stepAnimationRef.current = setTimeout(animateNextStep, 800);
-      }
-    };
-    
-    animateNextStep();
-  }, []);
+  }, [functionValue, limitPoint, direction, validation.valid, saveToHistory]);
 
   // Função para limpar resultados
   const clearResults = useCallback(() => {
@@ -215,6 +246,12 @@ export const useAdvancedLimits = () => {
     setFunctionValue(corrected);
   }, [functionValue]);
 
+  // Função para limpar histórico
+  const clearHistory = useCallback(() => {
+    setHistory([]);
+    localStorage.removeItem('calculationHistory');
+  }, []);
+
   // Cleanup ao desmontar
   useEffect(() => {
     return () => {
@@ -255,6 +292,10 @@ export const useAdvancedLimits = () => {
     // Estados de validação
     validation,
     suggestions,
+    
+    // Histórico
+    history,
+    clearHistory,
     
     // Estados de modais
     showExamples,

@@ -1,97 +1,63 @@
-/**
- * Componente de teclado matemático virtual
- */
-
 import React from 'react';
-import {
-  Box,
-  Grid,
-  Button,
-  Paper,
-  Typography,
-  IconButton,
-  Tooltip
-} from '@mui/material';
-import {
-  KeyboardArrowDown,
-  Backspace
-} from '@mui/icons-material';
+import { Box, Button, Paper, Typography, IconButton, Tooltip } from '@mui/material';
+import { KeyboardArrowDown, Backspace as BackspaceIcon } from '@mui/icons-material';
+
+// Definição das teclas, organizadas em linhas de 5 botões
+const keyRows = [
+  ['sin', 'cos', 'tan', 'log', 'e'],
+  ['csc', 'sec', 'cot', '√', 'x'],
+  ['y', 'z', 'π', 'x²', 'x³'],
+  ['(', ')', '*', '/', '+'],
+  ['-', '=', ',', '.', ''],
+  ['7', '8', '9'],
+  ['4', '5', '6'],
+  ['1', '2', '3'],
+  ['0', 'Backspace']
+];
 
 const MathKeyboard = ({ onKeyPress, onClose }) => {
-  // Array de teclas organizadas em linhas
-  const keyRows = [
-    ['x', 'y', 'z', 'π', '7', '8', '9', '(', ')'],
-    ['x²', 'x³', '√', 'e', '4', '5', '6', '*', '/'],
-    ['sin', 'cos', 'tan', 'log', '1', '2', '3', '+', '-'],
-    ['csc', 'sec', 'cot', ',', '0', '.', '=', 'Backspace']
-  ];
-
-  // Mapeamento de teclas especiais para texto correto
-  const keyMapping = {
-    'x²': 'x**2',
-    'x³': 'x**3',
-    '√': 'sqrt()',
-    'π': 'pi',
-    'sin': 'sin()',
-    'cos': 'cos()',
-    'tan': 'tan()',
-    'csc': 'csc()',
-    'sec': 'sec()',
-    'cot': 'cot()',
-    'log': 'log()',
-    'Backspace': 'backspace'
-  };
-
   const handleKeyClick = (key) => {
-    const mappedKey = keyMapping[key] || key;
-    onKeyPress(mappedKey);
+    // Mapeamento de teclas especiais para o valor a ser inserido
+    const keyMapping = {
+      'x²': 'x^2',
+      'x³': 'x^3',
+      '√': 'sqrt()',
+      'π': 'pi',
+      'sin': 'sin()',
+      'cos': 'cos()',
+      'tan': 'tan()',
+      'csc': 'csc()',
+      'sec': 'sec()',
+      'cot': 'cot()',
+      'log': 'log()',
+      'Backspace': 'backspace'
+    };
+    const valueToSend = keyMapping[key] || key;
+    onKeyPress(valueToSend);
   };
 
   const getKeyStyle = (key) => {
-    const isSpecial = ['x²', 'x³', '√', 'π', 'e', 'sin', 'cos', 'tan', 'csc', 'sec', 'cot', 'log'].includes(key);
+    const isFunction = ['sin', 'cos', 'tan', 'csc', 'sec', 'cot', 'log', '√'].includes(key);
     const isOperator = ['+', '-', '*', '/', '=', '(', ')'].includes(key);
-    const isNumber = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'].includes(key);
-    const isBackspace = key === 'Backspace';
+    const isNumber = !isNaN(parseFloat(key)) && isFinite(key) || key === '.';
+    const isAction = key === 'Backspace';
+
+    let backgroundColor = '#2A2A3E'; // Cor padrão
+    if (isFunction) backgroundColor = '#5C54A5'; // Roxo
+    if (isOperator) backgroundColor = '#008C9E'; // Ciano
+    if (isNumber) backgroundColor = '#424262';   // Cinza escuro
+    if (isAction) backgroundColor = '#D32F2F';   // Vermelho
 
     return {
       minHeight: 48,
-      fontSize: isSpecial ? '0.8rem' : '1rem',
-      fontWeight: isSpecial ? 600 : 500,
       fontFamily: 'JetBrains Mono, monospace',
-      borderRadius: 12,
+      borderRadius: '12px',
       textTransform: 'none',
-      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-      background: isBackspace 
-        ? 'linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%)'
-        : isSpecial
-        ? 'linear-gradient(135deg, #6C63FF 0%, #8B7FFF 100%)'
-        : isOperator
-        ? 'linear-gradient(135deg, #00D2FF 0%, #33DBFF 100%)'
-        : isNumber
-        ? 'linear-gradient(135deg, #FFD166 0%, #FFD980 100%)'
-        : 'linear-gradient(135deg, rgba(30, 30, 47, 0.8) 0%, rgba(42, 42, 62, 0.8) 100%)',
       color: '#FFFFFF',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+      background: backgroundColor,
       '&:hover': {
-        transform: 'translateY(-2px)',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-        ...(isBackspace && {
-          background: 'linear-gradient(135deg, #FF5252 0%, #FF7979 100%)'
-        }),
-        ...(isSpecial && {
-          background: 'linear-gradient(135deg, #4A42CC 0%, #6B5FFF 100%)'
-        }),
-        ...(isOperator && {
-          background: 'linear-gradient(135deg, #00A8CC 0%, #00C4E6 100%)'
-        }),
-        ...(isNumber && {
-          background: 'linear-gradient(135deg, #E6B800 0%, #FFD700 100%)'
-        })
-      },
-      '&:active': {
-        transform: 'translateY(0px)',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+        background: '#6C63FF', // Cor de hover para todas
+        transform: 'translateY(-2px)'
       }
     };
   };
@@ -100,91 +66,61 @@ const MathKeyboard = ({ onKeyPress, onClose }) => {
     <Paper
       elevation={0}
       sx={{
-        p: 3,
+        p: 2,
         mt: 2,
         background: 'rgba(30, 30, 47, 0.95)',
         backdropFilter: 'blur(20px)',
         border: '1px solid rgba(255, 255, 255, 0.1)',
-        borderRadius: 16,
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-        position: 'relative',
-        overflow: 'hidden'
+        borderRadius: '16px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
       }}
     >
-      {/* Efeito de brilho no topo */}
-      <Box sx={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '2px',
-        background: 'linear-gradient(90deg, #6C63FF, #00D2FF, #FFD166, #6C63FF)',
-        backgroundSize: '200% 100%',
-        animation: 'shimmer 3s ease-in-out infinite'
-      }} />
-
-      {/* Cabeçalho do teclado */}
-      <Box sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between',
-        mb: 2 
-      }}>
-        <Typography variant="h6" sx={{ 
-          color: '#6C63FF', 
-          fontWeight: 700,
-          fontSize: '1rem',
-          fontFamily: 'JetBrains Mono, monospace'
-        }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Typography variant="subtitle1" sx={{ color: '#B8B8CC', fontFamily: 'JetBrains Mono, monospace' }}>
           ⌨️ Teclado Matemático
         </Typography>
         <Tooltip title="Fechar teclado">
-          <IconButton
-            onClick={onClose}
-            size="small"
-            sx={{
-              color: '#B8B8CC',
-              '&:hover': {
-                color: '#6C63FF',
-                background: 'rgba(108, 99, 255, 0.1)'
-              }
-            }}
-          >
+          <IconButton onClick={onClose} size="small" sx={{ color: '#B8B8CC', '&:hover': { background: 'rgba(108, 99, 255, 0.1)' } }}>
             <KeyboardArrowDown />
           </IconButton>
         </Tooltip>
       </Box>
 
-      {/* Grid de teclas */}
+      {/* Renderização por linhas para garantir o layout */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
         {keyRows.map((row, rowIndex) => (
-          <Grid container spacing={1} key={rowIndex}>
-            {row.map((key, keyIndex) => (
-              <Grid item xs key={keyIndex}>
+          <Box 
+            key={rowIndex}
+            sx={{ 
+              display: 'flex', 
+              gap: 1,
+              width: '100%'
+            }}
+          >
+            {row.map((key, keyIndex) => {
+              if (key === '') return <Box key={`empty-${rowIndex}-${keyIndex}`} sx={{ flex: 1 }} />;
+              
+              // Aumentar tamanho dos botões . e , e = na linha 5
+              const isPunctuation = (key === '.' || key === ',') && rowIndex === 4;
+              const isEquals = key === '=' && rowIndex === 4;
+              
+              return (
                 <Button
-                  fullWidth
+                  key={key}
                   onClick={() => handleKeyClick(key)}
-                  sx={getKeyStyle(key)}
-                  startIcon={key === 'Backspace' ? <Backspace /> : null}
+                  sx={{
+                    ...getKeyStyle(key),
+                    flex: isPunctuation ? 4050.0 : isEquals ? 2700.0 : 1800.0,
+                    minWidth: 0
+                  }}
                 >
-                  {key === 'Backspace' ? '' : key}
+                  {key === 'Backspace' ? <BackspaceIcon fontSize="small" /> : key}
                 </Button>
-              </Grid>
-            ))}
-          </Grid>
+              );
+            })}
+          </Box>
         ))}
       </Box>
-
-      {/* Dica de uso */}
-      <Typography variant="caption" sx={{
-        display: 'block',
-        textAlign: 'center',
-        mt: 2,
-        color: '#8B8B9E',
-        fontStyle: 'italic'
-      }}>
-        💡 Dica: Clique nas teclas para inserir símbolos matemáticos
-      </Typography>
     </Paper>
   );
 };
