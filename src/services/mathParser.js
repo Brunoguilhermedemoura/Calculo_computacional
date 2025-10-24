@@ -25,8 +25,10 @@ export const normalizeExpression = (exprStr) => {
   
   // Converte ** para pow() quando o expoente é uma variável OU número
   // Isso resolve o problema "Value expected" do Math.js
+  // Primeiro: expressões com parênteses (x+1)**2 -> pow(x+1, 2)
   expr = expr.replace(/\(([^)]+)\)\*\*([a-zA-Z0-9]+)/g, 'pow($1, $2)');
-  expr = expr.replace(/([a-zA-Z0-9]+)\*\*([a-zA-Z0-9]+)/g, 'pow($1, $2)');
+  // Segundo: variáveis simples x**3 -> pow(x, 3) - CORREÇÃO DEFINITIVA
+  expr = expr.replace(/([a-zA-Z])\*\*([a-zA-Z0-9]+)/g, 'pow($1, $2)');
 
   // Converte funções trigonométricas
   Object.entries(TRIGONOMETRIC_FUNCTIONS).forEach(([pt, en]) => {

@@ -9,6 +9,7 @@ import {
   calculateLimit,
   validateExpressionWithFeedback
 } from './limitsEngineSimple.js';
+import { normalizeExpression } from './mathParser.js';
 
 // math já importado do mathConfig.js
 
@@ -136,18 +137,8 @@ export const validateExpression = (expr) => {
 export const autoCorrectExpression = (expr) => {
   if (!expr) return expr;
   
-  let corrected = expr;
-  
-  // Auto-correções comuns
-  corrected = corrected.replace(/\^/g, '**'); // ^ para **
-  corrected = corrected.replace(/,/g, '.');   // , para .
-  corrected = corrected.replace(/sen\(/g, 'sin('); // sen para sin
-  corrected = corrected.replace(/tg\(/g, 'tan(');  // tg para tan
-  corrected = corrected.replace(/ln\(/g, 'log(');  // ln para log
-  corrected = corrected.replace(/infinity/g, 'oo'); // infinity para oo
-  corrected = corrected.replace(/-infinity/g, '-oo'); // -infinity para -oo
-  
-  return corrected;
+  // Usar o normalizador centralizado em vez de normalização manual
+  return normalizeExpression(expr);
 };
 
 /**

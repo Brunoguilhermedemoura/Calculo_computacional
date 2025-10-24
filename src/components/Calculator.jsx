@@ -30,6 +30,7 @@ import UserProfile from './UserProfile.jsx';
 // import { motion } from 'framer-motion';
 import { useAdvancedLimits } from '../hooks/useAdvancedLimits.js';
 import { math } from '../utils/mathConfig.js';
+import { normalizeExpression } from '../services/mathParser.js';
 // Removido: import de teste
 import InputSection from './InputSection.jsx';
 import ResultSection from './ResultSection.jsx';
@@ -563,21 +564,22 @@ const Calculator = ({ onLogout }) => {
                           const range = 4;
                           const x = limit + (i / 199) * 2 * range - range;
                           
-                          // Normaliza a expressão para math.js
-                          let expr = functionValue
-                            .replace(/\^/g, '**')
-                            .replace(/sin/g, 'sin')
-                            .replace(/cos/g, 'cos')
-                            .replace(/tan/g, 'tan')
-                            .replace(/ln/g, 'log')
-                            .replace(/log/g, 'log10')
-                            .replace(/sqrt/g, 'sqrt')
-                            .replace(/pi/g, 'pi')
-                            .replace(/e/g, 'e');
+                          // Usar o normalizador centralizado
+                          let expr = normalizeExpression(functionValue);
                           
                           // Compila e avalia a expressão
-                          const compiled = math.compile(expr);
-                          const result = compiled.evaluate({ x });
+                          let result = null;
+                          try {
+                            const compiled = math.compile(expr);
+                            result = compiled.evaluate({ x });
+                          } catch {
+                            // Fallback: tentar avaliar diretamente
+                            try {
+                              result = math.evaluate(expr, { x });
+                            } catch {
+                              // Se falhar, retorna null
+                            }
+                          }
                           
                           return isFinite(result) ? result : null;
                         } catch {
