@@ -2,7 +2,7 @@
  * Modal de dicas de sintaxe com LaTeX formatado
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -22,12 +22,39 @@ import {
   Code,
   Functions,
   Calculate,
-  Science
+  Science,
+  Minimize as MinimizeIcon,
+  CropSquare as MaximizeIcon,
+  FullscreenExit as FullscreenExitIcon,
+  Restore as RestoreIcon
 } from '@mui/icons-material';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 
 const SyntaxTipsModal = ({ open, onClose }) => {
+  // Estados para controles de janela
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  
+  // Funções de controle
+  const handleMinimize = () => {
+    setIsMinimized(true);
+  };
+
+  const handleMaximize = () => {
+    setIsMaximized(!isMaximized);
+  };
+
+  const handleRestore = () => {
+    setIsMinimized(false);
+  };
+
+  const handleClose = () => {
+    setIsMaximized(false);
+    setIsMinimized(false);
+    onClose();
+  };
+  
   const syntaxExamples = [
     {
       category: 'Operações Básicas',
@@ -72,21 +99,24 @@ const SyntaxTipsModal = ({ open, onClose }) => {
   ];
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="md"
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 16,
-          background: 'rgba(30, 30, 47, 0.95)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-        }
-      }}
-    >
+    <>
+      <Dialog
+        open={open && !isMinimized}
+        onClose={handleClose}
+        maxWidth={isMaximized ? false : "md"}
+        fullScreen={isMaximized}
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: isMaximized ? 0 : 16,
+            background: 'rgba(30, 30, 47, 0.95)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+            minHeight: isMaximized ? '100vh' : 'auto'
+          }
+        }}
+      >
       <DialogTitle sx={{ 
         display: 'flex', 
         alignItems: 'center', 
@@ -124,22 +154,91 @@ const SyntaxTipsModal = ({ open, onClose }) => {
             </Typography>
           </Box>
         </Box>
-        <IconButton 
-          onClick={onClose} 
-          size="small"
-          sx={{
-            color: '#B8B8CC',
-            '&:hover': {
-              color: '#FFFFFF',
-              background: 'rgba(255, 255, 255, 0.1)'
-            }
-          }}
-        >
-          <Close />
-        </IconButton>
+        
+        {/* Controles de Janela */}
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          {/* Botão Minimizar */}
+          <IconButton
+            onClick={handleMinimize}
+            sx={{
+              width: 36,
+              height: 36,
+              background: 'rgba(108, 99, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(108, 99, 255, 0.3)',
+              borderRadius: 2,
+              color: '#6C63FF',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                background: 'rgba(108, 99, 255, 0.2)',
+                border: '1px solid rgba(108, 99, 255, 0.5)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 12px rgba(108, 99, 255, 0.2)'
+              }
+            }}
+          >
+            <MinimizeIcon fontSize="small" />
+          </IconButton>
+          
+          {/* Botão Maximizar */}
+          <IconButton
+            onClick={handleMaximize}
+            sx={{
+              width: 36,
+              height: 36,
+              background: 'rgba(0, 210, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(0, 210, 255, 0.3)',
+              borderRadius: 2,
+              color: '#00D2FF',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                background: 'rgba(0, 210, 255, 0.2)',
+                border: '1px solid rgba(0, 210, 255, 0.5)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 12px rgba(0, 210, 255, 0.2)'
+              }
+            }}
+          >
+            {isMaximized ? (
+              <FullscreenExitIcon fontSize="small" />
+            ) : (
+              <MaximizeIcon fontSize="small" />
+            )}
+          </IconButton>
+          
+          {/* Botão Fechar */}
+          <IconButton
+            onClick={handleClose}
+            sx={{
+              width: 36,
+              height: 36,
+              background: 'rgba(255, 82, 82, 0.1)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 82, 82, 0.3)',
+              borderRadius: 2,
+              color: '#FF5252',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                background: 'rgba(255, 82, 82, 0.2)',
+                border: '1px solid rgba(255, 82, 82, 0.5)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 12px rgba(255, 82, 82, 0.2)'
+              }
+            }}
+          >
+            <Close fontSize="small" />
+          </IconButton>
+        </Box>
       </DialogTitle>
 
-      <DialogContent sx={{ pt: 3 }}>
+      <DialogContent sx={{ 
+        pt: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        height: isMaximized ? 'calc(100vh - 150px)' : 'auto',
+        overflow: isMaximized ? 'auto' : 'auto'
+      }}>
         <Typography variant="body2" sx={{ 
           mb: 3,
           color: '#B8B8CC',
@@ -284,7 +383,7 @@ const SyntaxTipsModal = ({ open, onClose }) => {
 
       <DialogActions sx={{ p: 3, pt: 2, borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
         <Button 
-          onClick={onClose} 
+          onClick={handleClose} 
           variant="contained"
           size="large"
           sx={{
@@ -306,6 +405,119 @@ const SyntaxTipsModal = ({ open, onClose }) => {
         </Button>
       </DialogActions>
     </Dialog>
+
+    {/* Modal Minimizado */}
+    {open && isMinimized && (
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 20,
+          right: 20,
+          minWidth: 300,
+          maxWidth: 400,
+          background: 'rgba(30, 30, 47, 0.95)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(108, 99, 255, 0.3)',
+          borderRadius: 12,
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          zIndex: 1400,
+          overflow: 'hidden',
+          transition: 'all 0.3s ease'
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            p: 2,
+            cursor: 'pointer',
+            '&:hover': {
+              background: 'rgba(108, 99, 255, 0.05)'
+            }
+          }}
+          onClick={handleRestore}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              boxShadow: '0 4px 12px rgba(108, 99, 255, 0.3)'
+            }}>
+              <Code fontSize="small" />
+            </Box>
+            <Box>
+              <Typography variant="body1" sx={{ 
+                color: '#6C63FF',
+                fontWeight: 600,
+                fontSize: '0.95rem'
+              }}>
+                Dicas de Sintaxe
+              </Typography>
+              <Typography variant="caption" sx={{ 
+                color: '#B8B8CC',
+                fontSize: '0.75rem'
+              }}>
+                Guia de sintaxe matemática
+              </Typography>
+            </Box>
+          </Box>
+          
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            {/* Botão Restaurar */}
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRestore();
+              }}
+              sx={{
+                width: 32,
+                height: 32,
+                background: 'rgba(108, 99, 255, 0.1)',
+                border: '1px solid rgba(108, 99, 255, 0.3)',
+                borderRadius: 1.5,
+                color: '#6C63FF',
+                '&:hover': {
+                  background: 'rgba(108, 99, 255, 0.2)',
+                  transform: 'scale(1.1)'
+                }
+              }}
+            >
+              <RestoreIcon fontSize="small" />
+            </IconButton>
+            
+            {/* Botão Fechar */}
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClose();
+              }}
+              sx={{
+                width: 32,
+                height: 32,
+                background: 'rgba(255, 82, 82, 0.1)',
+                border: '1px solid rgba(255, 82, 82, 0.3)',
+                borderRadius: 1.5,
+                color: '#FF5252',
+                '&:hover': {
+                  background: 'rgba(255, 82, 82, 0.2)',
+                  transform: 'scale(1.1)'
+                }
+              }}
+            >
+              <Close fontSize="small" />
+            </IconButton>
+          </Box>
+        </Box>
+      </Box>
+    )}
+    </>
   );
 };
 
