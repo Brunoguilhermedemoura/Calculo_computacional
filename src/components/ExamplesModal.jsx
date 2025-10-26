@@ -276,9 +276,28 @@ const ExamplesModal = ({ open, onClose, onLoadExample }) => {
           </Table>
         </TableContainer>
         
-        <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-          <Typography variant="body2" color="text.secondary">
-            <strong>Dica:</strong> Estes exemplos demonstram diferentes tipos de limites e 
+        <Box sx={{ 
+          mt: 3, 
+          p: 3, 
+          background: 'rgba(0, 210, 255, 0.1)',
+          border: '1px solid rgba(0, 210, 255, 0.3)',
+          borderRadius: 12,
+          backdropFilter: 'blur(10px)'
+        }}>
+          <Typography variant="body2" sx={{ 
+            fontWeight: 600,
+            mb: 1,
+            color: '#00D2FF',
+            fontSize: '1rem'
+          }}>
+            💡 Dica:
+          </Typography>
+          <Typography variant="body2" sx={{ 
+            color: '#B8B8CC',
+            fontSize: '0.95rem',
+            lineHeight: 1.8
+          }}>
+            Estes exemplos demonstram diferentes tipos de limites e 
             formas indeterminadas. Experimente cada um para entender as técnicas de cálculo.
           </Typography>
         </Box>
