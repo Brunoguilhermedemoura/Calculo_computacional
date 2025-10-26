@@ -71,6 +71,36 @@ const InputSection = ({
     validateExpression(functionValue);
   }, [functionValue, validateExpression]);
 
+  // Capturar posição do cursor em tempo real
+  React.useEffect(() => {
+    const updateCursorPosition = () => {
+      if (inputRef.current && document.activeElement === inputRef.current) {
+        const pos = inputRef.current.selectionStart || 0;
+        lastCursorPositionRef.current = pos;
+      }
+    };
+
+    // Adicionar listeners para capturar a posição do cursor
+    const input = inputRef.current;
+    if (input) {
+      input.addEventListener('click', updateCursorPosition);
+      input.addEventListener('keyup', updateCursorPosition);
+      input.addEventListener('keydown', updateCursorPosition);
+    }
+
+    // Listener global para mudanças de seleção
+    document.addEventListener('selectionchange', updateCursorPosition);
+
+    return () => {
+      if (input) {
+        input.removeEventListener('click', updateCursorPosition);
+        input.removeEventListener('keyup', updateCursorPosition);
+        input.removeEventListener('keydown', updateCursorPosition);
+      }
+      document.removeEventListener('selectionchange', updateCursorPosition);
+    };
+  }, []);
+
   // Restaurar posição do cursor após atualizações do teclado virtual
   React.useEffect(() => {
     if (inputRef.current && nextCursorPositionRef.current !== null) {
@@ -91,9 +121,14 @@ const InputSection = ({
   // Capturar posição do cursor quando o usuário clica ou digita
   const handleInputClick = () => {
     if (inputRef.current) {
-      const pos = inputRef.current.selectionStart || 0;
-      lastCursorPositionRef.current = pos;
-      console.log('Input clicked - Cursor pos:', pos);
+      // Usar setTimeout para garantir que a posição está atualizada após o clique
+      setTimeout(() => {
+        if (inputRef.current) {
+          const pos = inputRef.current.selectionStart || 0;
+          lastCursorPositionRef.current = pos;
+          console.log('Input clicked - Cursor pos:', pos);
+        }
+      }, 0);
     }
   };
 
@@ -105,6 +140,52 @@ const InputSection = ({
     }
   };
 
+  // Handler para capturar posição quando o campo perde foco
+  const handleInputBlur = () => {
+    if (inputRef.current) {
+      const pos = inputRef.current.selectionStart || 0;
+      lastCursorPositionRef.current = pos;
+      console.log('Input blur - Cursor pos:', pos);
+    }
+  };
+
+  // Handler para abrir/fechar o teclado e focar no input
+  const handleToggleKeyboard = () => {
+    const newState = !showKeyboard;
+    setShowKeyboard(newState);
+    
+    if (newState && inputRef.current) {
+      // Usar múltiplos métodos para garantir que o foco seja aplicado
+      requestAnimationFrame(() => {
+        if (inputRef.current) {
+          // Pequeno delay para garantir renderização
+          setTimeout(() => {
+            if (inputRef.current) {
+              inputRef.current.focus();
+              // Se não há posição específica, coloca o cursor no final
+              const pos = lastCursorPositionRef.current || functionValue.length;
+              inputRef.current.setSelectionRange(pos, pos);
+              lastCursorPositionRef.current = pos;
+              
+              // Garantir que o cursor continue piscando
+              if (inputRef.current.setSelectionRange) {
+                inputRef.current.setSelectionRange(pos, pos);
+              }
+              
+              // Forçar o foco novamente para garantir que o cursor apareça
+              setTimeout(() => {
+                if (inputRef.current) {
+                  inputRef.current.focus();
+                  inputRef.current.setSelectionRange(pos, pos);
+                }
+              }, 50);
+            }
+          }, 150);
+        }
+      });
+    }
+  };
+
   const handleLoadFromHistory = (calculation) => {
     setFunctionValue(calculation.function);
     setLimitPoint(calculation.point);
@@ -113,8 +194,9 @@ const InputSection = ({
 
   // Função para lidar com teclas do teclado virtual
   const handleKeyPress = (key) => {
-    // Usar a última posição conhecida do cursor
-    const cursorPos = lastCursorPositionRef.current;
+    // Tentar obter a posição atual do input, caso contrário usar a última conhecida
+    const currentPos = inputRef.current?.selectionStart ?? null;
+    const cursorPos = currentPos !== null ? currentPos : lastCursorPositionRef.current;
     console.log('Virtual keyboard - Cursor pos:', cursorPos, 'Key:', key, 'Function:', functionValue);
     
     if (key === 'backspace') {
@@ -248,6 +330,7 @@ const InputSection = ({
         onChange={(e) => setFunctionValue(e.target.value)}
         onClick={handleInputClick}
         onKeyDown={handleInputKeyDown}
+        onBlur={handleInputBlur}
         placeholder="Ex: (x^2 - 1)/(x - 1)"
         variant="outlined"
         error={!realTimeValidation.valid}
@@ -264,7 +347,13 @@ const InputSection = ({
           style: { 
             fontFamily: 'JetBrains Mono, monospace', 
             fontSize: '1.1rem',
-            color: '#FFFFFF'
+            color: '#FFFFFF',
+            caretColor: '#FFFFFF'
+          },
+          onFocus: (e) => {
+            // Garantir que o cursor está visível ao focar
+            const pos = e.target.selectionStart || 0;
+            lastCursorPositionRef.current = pos;
           },
           endAdornment: (
             <InputAdornment position="end">
@@ -276,7 +365,7 @@ const InputSection = ({
                 </Tooltip>
                 <Tooltip title={showKeyboard ? 'Fechar teclado' : 'Abrir teclado matemático'}>
                   <IconButton
-                    onClick={() => setShowKeyboard(!showKeyboard)}
+                    onClick={handleToggleKeyboard}
                     size="small"
                     sx={{
                       color: showKeyboard ? '#6C63FF' : '#B8B8CC',
