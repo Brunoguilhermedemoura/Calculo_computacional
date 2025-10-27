@@ -228,7 +228,17 @@ const ResultSection = ({
               fontWeight: 'bold'
             }}>
               {result === 'Erro' ? (
-                <Alert severity="error" sx={{ background: 'rgba(255, 107, 107, 0.1)' }}>{result}</Alert>
+                <Alert 
+                  severity="error" 
+                  sx={{ 
+                    background: 'rgba(255, 107, 107, 0.1)',
+                    '& .MuiAlert-message': {
+                      whiteSpace: 'pre-line'
+                    }
+                  }}
+                >
+                  {steps.length > 0 ? steps[0] : result}
+                </Alert>
               ) : (
                 <InlineMath math={formatMathExpression(result)} />
               )}
