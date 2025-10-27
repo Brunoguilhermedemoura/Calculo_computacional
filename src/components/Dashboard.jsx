@@ -361,24 +361,35 @@ const Dashboard = ({ onStartCalculator, onLogout }) => {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 3.5 }}>
-              <Avatar
+              <Box
                 sx={{
                   width: 64,
                   height: 64,
+                  borderRadius: 2,
                   background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
-                  fontSize: '1.6rem',
-                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   boxShadow: '0 8px 25px rgba(108, 99, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
                   animation: 'glow 3s ease-in-out infinite',
                   transition: 'all 0.3s ease',
+                  overflow: 'hidden',
                   '&:hover': {
                     transform: 'scale(1.05) rotate(5deg)',
                     boxShadow: '0 12px 35px rgba(108, 99, 255, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4)'
                   }
                 }}
               >
-                {getInitials(user.name)}
-              </Avatar>
+                <img 
+                  src="/logo.png" 
+                  alt="Logo" 
+                  style={{
+                    width: '80%',
+                    height: '80%',
+                    objectFit: 'contain'
+                  }}
+                />
+              </Box>
               <Box>
                 <Typography
                   variant="h4"
@@ -558,22 +569,35 @@ const Dashboard = ({ onStartCalculator, onLogout }) => {
                   }
                 }}
               >
-                <Avatar
+                <Box
                   className="main-icon"
                   sx={{
                     width: 88,
                     height: 88,
                     background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
                     margin: '0 auto 28px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 2,
                     boxShadow: `
                       0 12px 40px rgba(108, 99, 255, 0.5),
                       inset 0 1px 0 rgba(255, 255, 255, 0.3)
                     `,
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.3s ease',
+                    overflow: 'hidden'
                   }}
                 >
-                  <CalculateIcon sx={{ fontSize: 44 }} />
-                </Avatar>
+                  <img 
+                    src="/logo.png" 
+                    alt="Logo Calculadora" 
+                    style={{
+                      width: '80%',
+                      height: '80%',
+                      objectFit: 'contain'
+                    }}
+                  />
+                </Box>
                 
                 <Typography
                   variant="h5"

@@ -256,15 +256,13 @@ const Calculator = ({ onLogout }) => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'white',
-                  fontWeight: 'bold',
-                  fontSize: '1.5rem',
                   boxShadow: `
                     0 12px 40px rgba(108, 99, 255, 0.5),
                     inset 0 1px 0 rgba(255, 255, 255, 0.3)
                   `,
                   animation: 'glow 4s ease-in-out infinite',
                   transition: 'all 0.3s ease',
+                  overflow: 'hidden',
                   '&:hover': {
                     transform: 'scale(1.05) rotate(5deg)',
                     boxShadow: `
@@ -273,7 +271,15 @@ const Calculator = ({ onLogout }) => {
                     `
                   }
                 }}>
-                  ∫
+                  <img 
+                    src="/logo.png" 
+                    alt="Logo" 
+                    style={{
+                      width: '80%',
+                      height: '80%',
+                      objectFit: 'contain'
+                    }}
+                  />
                 </Box>
               </Zoom>
               

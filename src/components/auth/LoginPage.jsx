@@ -102,7 +102,7 @@ const LoginPage = ({ onSwitchToRegister }) => {
     setIsSubmitting(true);
     try {
       await login(formData.email, formData.password);
-    } catch (err) {
+    } catch {
       // Erro já é tratado pelo contexto
     } finally {
       setIsSubmitting(false);
@@ -224,8 +224,6 @@ const LoginPage = ({ onSwitchToRegister }) => {
             flexDirection: { xs: 'column', md: 'row' },
             background: 'rgba(30, 30, 47, 0.9)',
             backdropFilter: 'blur(25px)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            borderRadius: 4,
             boxShadow: `
               0 12px 40px rgba(0, 0, 0, 0.4),
               0 4px 12px rgba(0, 0, 0, 0.2),
@@ -267,104 +265,26 @@ const LoginPage = ({ onSwitchToRegister }) => {
                 linear-gradient(135deg, rgba(108, 99, 255, 0.1) 0%, rgba(0, 210, 255, 0.1) 100%),
                 radial-gradient(circle at 30% 70%, rgba(108, 99, 255, 0.2) 0%, transparent 50%)
               `,
-              p: { xs: 3, md: 5 },
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              textAlign: 'center',
+              p: 0,
+              m: 0,
               position: 'relative',
-              minHeight: { xs: 'auto', md: 500 }
+              height: '100%',
+              overflow: 'hidden'
             }}
           >
-            {/* Ícone principal */}
+            {/* Logo principal - Grande */}
             <Zoom in timeout={1000}>
-              <Box
-                sx={{
-                  width: 100,
-                  height: 100,
-                  borderRadius: 4,
-                  background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 24px',
-                  boxShadow: `
-                    0 16px 50px rgba(108, 99, 255, 0.5),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.3)
-                  `,
-                  animation: 'glow 4s ease-in-out infinite',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05) rotate(5deg)',
-                    boxShadow: `
-                      0 20px 60px rgba(108, 99, 255, 0.6),
-                      inset 0 1px 0 rgba(255, 255, 255, 0.4)
-                    `
-                  }
+              <img 
+                src="/logo.png" 
+                alt="Logo Calculadora" 
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'fill',
+                  display: 'block'
                 }}
-              >
-                <LoginIcon sx={{ 
-                  color: 'white', 
-                  fontSize: 48,
-                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))'
-                }} />
-              </Box>
+              />
             </Zoom>
-            
-            {/* Título principal */}
-            <Slide direction="right" in timeout={1200}>
-              <Typography
-                variant="h3"
-                sx={{
-                  fontWeight: 700,
-                  background: 'linear-gradient(135deg, #6C63FF 0%, #00D2FF 100%)',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  mb: 2,
-                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-                  letterSpacing: '-0.02em'
-                }}
-              >
-                Bem-vindo de volta
-              </Typography>
-            </Slide>
-            
-            {/* Subtítulo */}
-            <Fade in timeout={1400}>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  color: '#B8B8CC',
-                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
-                  fontWeight: 400,
-                  letterSpacing: '0.01em',
-                  mb: 3,
-                  maxWidth: 300
-                }}
-              >
-                Faça login para continuar seus cálculos
-              </Typography>
-            </Fade>
-
-            {/* Informações adicionais */}
-            <Fade in timeout={1600}>
-              <Box sx={{ mt: 4 }}>
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    color: '#8B8B9E',
-                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
-                    fontWeight: 400,
-                    letterSpacing: '0.02em',
-                    lineHeight: 1.6
-                  }}
-                >
-                  Calculadora de Limites • Cálculo Diferencial e Integral
-                </Typography>
-              </Box>
-            </Fade>
           </Box>
 
           {/* Seção Direita - Formulário */}
