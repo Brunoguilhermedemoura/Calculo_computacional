@@ -108,6 +108,13 @@ export const detectFundamentalLimit = (expr, limitPoint) => {
   // Verifica limites trigonométricos
   for (const [pattern, info] of Object.entries(FUNDAMENTAL_LIMITS.TRIGONOMETRIC)) {
     if (matchesPattern(normalized, pattern, limitPoint)) {
+      // Verifica compatibilidade do ponto limite baseado no info.when
+      if (info.when === 'x → 0' && limitPoint !== 0 && Math.abs(limitPoint) > 1e-10) {
+        continue; // Pula este padrão se o limite não é 0
+      }
+      if (info.when === 'x → ∞' && Math.abs(limitPoint) !== Infinity) {
+        continue; // Pula este padrão se o limite não é infinito
+      }
       return { ...info, category: 'trigonometric' };
     }
   }
@@ -115,6 +122,13 @@ export const detectFundamentalLimit = (expr, limitPoint) => {
   // Verifica limites exponenciais
   for (const [pattern, info] of Object.entries(FUNDAMENTAL_LIMITS.EXPONENTIAL)) {
     if (matchesPattern(normalized, pattern, limitPoint)) {
+      // Verifica compatibilidade do ponto limite baseado no info.when
+      if (info.when === 'x → 0' && limitPoint !== 0 && Math.abs(limitPoint) > 1e-10) {
+        continue;
+      }
+      if (info.when === 'x → ∞' && Math.abs(limitPoint) !== Infinity) {
+        continue;
+      }
       return { ...info, category: 'exponential' };
     }
   }
@@ -130,23 +144,31 @@ export const detectFundamentalLimit = (expr, limitPoint) => {
  * @returns {boolean} True se corresponde ao padrão
  */
 const matchesPattern = (expr, pattern, limitPoint) => {
-  // Converte padrões para regex
-  const regexPattern = pattern
+  // Remove espaços de ambos para comparação
+  const exprClean = expr.replace(/\s/g, '');
+  const patternClean = pattern.replace(/\s/g, '');
+  
+  // Comparação direta primeiro (mais eficiente)
+  if (exprClean === patternClean) {
+    // Verifica se o ponto limite é compatível (verifica no info.when através do caller)
+    return true;
+  }
+  
+  // Tenta correspondência com regex como fallback (para casos com variações)
+  const regexPattern = patternClean
     .replace(/\(/g, '\\(')
     .replace(/\)/g, '\\)')
     .replace(/\*/g, '\\*')
     .replace(/\+/g, '\\+')
-    .replace(/\^/g, '\\^')
-    .replace(/x/g, 'x');
+    .replace(/\^/g, '\\^');
   
   const regex = new RegExp(`^${regexPattern}$`);
   
   // Verifica se a expressão corresponde ao padrão
-  if (!regex.test(expr)) return false;
+  if (!regex.test(exprClean)) return false;
   
-  // Verifica se o ponto limite é compatível
-  if (pattern.includes('x → 0') && limitPoint !== 0) return false;
-  if (pattern.includes('x → ∞') && Math.abs(limitPoint) !== Infinity) return false;
+  // Verifica compatibilidade do ponto limite através do info.when no detectFundamentalLimit
+  // (essa verificação será feita pelo caller baseado no info.when)
   
   return true;
 };
