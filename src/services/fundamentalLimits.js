@@ -137,25 +137,58 @@ export const detectFundamentalLimit = (expr, limitPoint) => {
 };
 
 /**
+ * Converte pow(a, b) para (a)^b ou (a)**b para comparação
+ * @param {string} expr - Expressão com pow()
+ * @returns {string} Expressão convertida
+ */
+const normalizePowToPower = (expr) => {
+  // Converte pow(base, exp) para (base)^exp ou (base)**exp
+  return expr.replace(/pow\(([^,]+),\s*([^)]+)\)/g, '($1)^($2)')
+             .replace(/\*\*/g, '^'); // Também converte ** para ^ para comparação
+};
+
+/**
  * Verifica se uma expressão corresponde a um padrão de limite fundamental
  * @param {string} expr - Expressão normalizada
  * @param {string} pattern - Padrão a ser verificado
- * @param {number|string} limitPoint - Ponto limite
+ * @param {number|string} limitPoint - Ponto limite (não usado nesta função, mas necessário para compatibilidade)
  * @returns {boolean} True se corresponde ao padrão
  */
+// eslint-disable-next-line no-unused-vars
 const matchesPattern = (expr, pattern, limitPoint) => {
   // Remove espaços de ambos para comparação
-  const exprClean = expr.replace(/\s/g, '');
+  let exprClean = expr.replace(/\s/g, '');
   const patternClean = pattern.replace(/\s/g, '');
   
+  // Normaliza pow() para ^ para comparação
+  exprClean = normalizePowToPower(exprClean);
+  let patternNormalized = normalizePowToPower(patternClean);
+  
   // Comparação direta primeiro (mais eficiente)
-  if (exprClean === patternClean) {
-    // Verifica se o ponto limite é compatível (verifica no info.when através do caller)
+  if (exprClean === patternNormalized) {
     return true;
   }
   
+  // Também tenta comparação após normalizar ambas para formato comum
+  // Remove parênteses extras para comparação mais flexível
+  const exprSimplified = exprClean.replace(/\(/g, '').replace(/\)/g, '');
+  const patternSimplified = patternNormalized.replace(/\(/g, '').replace(/\)/g, '');
+  
+  if (exprSimplified === patternSimplified) {
+    return true;
+  }
+  
+  // Verifica padrões específicos conhecidos
+  // Padrão: (1+1/x)^x ou pow(1+1/x, x)
+  if (pattern === '(1+1/x)^x') {
+    // Após normalização, ambas devem ter (1+1/x) e ^(x) ou similar
+    const hasBase = exprClean.includes('(1+1/x)') || exprClean.includes('1+1/x');
+    const hasExponent = exprClean.includes('^x') || exprClean.includes('^(x)') || exprClean.includes('^(x)');
+    return hasBase && hasExponent;
+  }
+  
   // Tenta correspondência com regex como fallback (para casos com variações)
-  const regexPattern = patternClean
+  const regexPattern = patternNormalized
     .replace(/\(/g, '\\(')
     .replace(/\)/g, '\\)')
     .replace(/\*/g, '\\*')
@@ -165,12 +198,11 @@ const matchesPattern = (expr, pattern, limitPoint) => {
   const regex = new RegExp(`^${regexPattern}$`);
   
   // Verifica se a expressão corresponde ao padrão
-  if (!regex.test(exprClean)) return false;
+  if (regex.test(exprClean)) {
+    return true;
+  }
   
-  // Verifica compatibilidade do ponto limite através do info.when no detectFundamentalLimit
-  // (essa verificação será feita pelo caller baseado no info.when)
-  
-  return true;
+  return false;
 };
 
 /**

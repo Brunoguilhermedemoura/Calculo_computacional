@@ -36,6 +36,27 @@ export const calculateLimit = (exprStr, limitPoint) => {
     if (Math.abs(point) === Infinity) {
       steps.push('🔍 Limite no infinito detectado');
       
+      // PRIMEIRO: Verifica se é um limite fundamental (ex: (1+1/x)^x → e)
+      const fundamental = detectFundamentalLimit(normalizedExpr, point);
+      if (fundamental) {
+        steps.push(`✨ Limite fundamental detectado: ${fundamental.description}`);
+        const fundamentalResult = applyFundamentalLimit(normalizedExpr, fundamental);
+        
+        // Converte resultado 'e' para Math.E se necessário
+        let resultValue = fundamentalResult.result;
+        if (resultValue === 'e') {
+          resultValue = Math.E;
+        }
+        
+        return {
+          result: formatResult(resultValue),
+          steps: [...steps, ...fundamentalResult.steps],
+          tips: [...tips, ...fundamentalResult.tips],
+          strategy: fundamentalResult.strategy,
+          form: fundamental.when === 'x → ∞' ? '1^∞' : 'numérico'
+        };
+      }
+      
       // Para funções racionais no infinito, aplica regra do maior grau
       if (normalizedExpr.includes('/') && (normalizedExpr.includes('pow(x') || normalizedExpr.includes('x**') || normalizedExpr.includes('x^'))) {
         steps.push('📊 Aplicando estratégia de maior grau para função racional');
@@ -66,7 +87,7 @@ export const calculateLimit = (exprStr, limitPoint) => {
             const getLeadingCoeff = (expr, degree) => {
               if (degree === 0) {
                 // Tenta extrair constante
-                const constMatch = expr.match(/(?:^|\+|\-|\()(\d+(?:\.\d+)?)(?![*x])/);
+                const constMatch = expr.match(/(?:^|\+|-|\()(\d+(?:\.\d+)?)(?![*x])/);
                 return constMatch ? parseFloat(constMatch[1]) : 1;
               }
               
