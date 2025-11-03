@@ -66,8 +66,23 @@ const ResultSection = ({
   };
 
   const formatMathExpression = (expression) => {
+    // Verifica se é o formato especial do Euler (e≈...)
+    if (typeof expression === 'string' && expression.startsWith('e≈')) {
+      // Já está no formato correto, apenas converte para LaTeX
+      return expression.replace(/e≈/, 'e\\approx');
+    }
+    
+    // Verifica se é um número que corresponde ao valor de Euler
+    if (typeof expression === 'number') {
+      const eulerValue = Math.E;
+      const tolerance = 1e-10;
+      if (Math.abs(expression - eulerValue) < tolerance) {
+        return `e\\approx${eulerValue.toFixed(15).replace('.', ',')}`;
+      }
+    }
+    
     // Converte notação para LaTeX
-    return expression
+    return String(expression)
       .replace(/\*\*/g, '^')
       .replace(/oo/g, '\\infty')
       .replace(/-oo/g, '-\\infty')
@@ -77,7 +92,8 @@ const ResultSection = ({
       .replace(/log/g, '\\ln')
       .replace(/sqrt/g, '\\sqrt')
       .replace(/pi/g, '\\pi')
-      .replace(/E/g, 'e');
+      .replace(/E/g, 'e')
+      .replace(/e≈/g, 'e\\approx'); // Converte e≈ para LaTeX
   };
 
   const copyToClipboard = async (text, type = 'text') => {

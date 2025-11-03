@@ -114,6 +114,14 @@ export const formatResult = (result) => {
   } else if (result === -Infinity) {
     return '-∞';
   } else if (typeof result === 'number') {
+    // Verifica se é o número de Euler (com tolerância para diferenças de precisão)
+    const eulerValue = Math.E;
+    const tolerance = 1e-10;
+    if (Math.abs(result - eulerValue) < tolerance) {
+      // Formata como "e≈2,718281828459045" com vírgula como separador decimal
+      return `e≈${eulerValue.toFixed(15).replace('.', ',')}`;
+    }
+    
     // Arredonda para 6 casas decimais se necessário
     if (Number.isInteger(result)) {
       return result.toString();

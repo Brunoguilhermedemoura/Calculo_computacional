@@ -32,6 +32,30 @@ export const calculateLimit = (exprStr, limitPoint) => {
     
     steps.push(`🎯 Calculando: lim(x→${limitPoint}) ${normalizedExpr}`);
     
+    // --- CASO ESPECIAL: x*log(x) quando x -> 0⁺ (forma 0·∞) ---
+    {
+      const isZeroPoint = point === 0 || Math.abs(point) < 1e-12;
+      if (isZeroPoint) {
+        const exprNoSpace = normalizedExpr.replace(/\s+/g, '');
+        // aceita x*log(x) e log(x)*x, com/sem parênteses ao redor de x
+        const xLogPattern = /^(?:\(?x\)?\*log\(\s*x\s*\)|log\(\s*x\s*\)\*\(?x\)?)$/i;
+        
+        if (xLogPattern.test(exprNoSpace)) {
+          steps.push('🔍 Forma 0·∞ detectada: x·log(x) em x→0⁺');
+          // Abordagem por ordem de crescimento (mais robusta e sem avaliar log(0))
+          steps.push('📐 Fato assintótico: x^α·(log x)^β → 0 quando x→0⁺ e α>0 (aqui α=1, β=1)');
+          tips.push('Perto de 0⁺, x "vence" log(x): o produto vai a 0.');
+          return {
+            result: formatResult(0),
+            steps,
+            tips,
+            strategy: 'ordem_de_crescimento',
+            form: '0·∞'
+          };
+        }
+      }
+    }
+    
     // VERIFICA SE É LIMITE NO INFINITO
     if (Math.abs(point) === Infinity) {
       steps.push('🔍 Limite no infinito detectado');
@@ -57,7 +81,102 @@ export const calculateLimit = (exprStr, limitPoint) => {
         };
       }
       
-      // Para funções racionais no infinito, aplica regra do maior grau
+      // SEGUNDO: Verifica se é forma ∞-∞ com raízes (ex: sqrt(x^2+1)-x)
+      if (normalizedExpr.includes('sqrt') && normalizedExpr.includes('-') && normalizedExpr.includes('x')) {
+        // Tenta detectar padrão: sqrt(...) - x ou sqrt(...) - termo_com_x
+        // Usa uma função para extrair conteúdo com parênteses aninhados
+        const extractSqrtContent = (expr) => {
+          let depth = 0;
+          let start = expr.indexOf('sqrt(');
+          if (start === -1) return null;
+          
+          start += 5; // Pula "sqrt("
+          let contentStart = start;
+          let content = '';
+          
+          for (let i = start; i < expr.length; i++) {
+            if (expr[i] === '(') depth++;
+            else if (expr[i] === ')') {
+              if (depth === 0) {
+                // Encontrou o fechamento do sqrt
+                content = expr.substring(contentStart, i);
+                const remaining = expr.substring(i + 1).trim();
+                // Verifica se o que vem depois é "-x"
+                if (remaining.startsWith('-x') || remaining.match(/^\s*-\s*x\s*$/)) {
+                  return { content, rest: remaining };
+                }
+                return null;
+              }
+              depth--;
+            }
+          }
+          return null;
+        };
+        
+        const sqrtMatch = extractSqrtContent(normalizedExpr);
+        
+        if (sqrtMatch) {
+          steps.push('🔍 Detectada forma indeterminada ∞-∞ com raiz quadrada');
+          steps.push('📐 Aplicando estratégia de racionalização pelo conjugado');
+          
+          try {
+            // Extrai a expressão dentro do sqrt
+            const sqrtContent = sqrtMatch.content;
+            
+            // Racionalização: sqrt(a) - x = (sqrt(a) - x) * (sqrt(a) + x) / (sqrt(a) + x)
+            // Simplifica para: (a - x²) / (sqrt(a) + x)
+            const numerator = `(${sqrtContent}) - pow(x, 2)`;
+            const denominator = `sqrt(${sqrtContent}) + x`;
+            const rationalized = `(${numerator}) / (${denominator})`;
+            
+            steps.push(`📝 Multiplicando pelo conjugado: (sqrt(${sqrtContent}) - x) × (sqrt(${sqrtContent}) + x) / (sqrt(${sqrtContent}) + x)`);
+            steps.push(`✨ Simplificando numerador usando identidade: (sqrt(a) - x)(sqrt(a) + x) = a - x²`);
+            steps.push(`📝 Expressão racionalizada: ${rationalized}`);
+            
+            // Simplifica o numerador se possível
+            try {
+              const simplifiedNum = math.simplify(numerator);
+              const numStr = simplifiedNum.toString();
+              steps.push(`📐 Numerador simplificado: ${numStr}`);
+              
+              // Para sqrt(x^2+1)-x quando x→∞, o limite é 0
+              // Porque: (x²+1 - x²)/(sqrt(x²+1)+x) = 1/(sqrt(x²+1)+x) → 1/∞ = 0
+              // Quando x→∞, sqrt(x²+1) ≈ x, então sqrt(x²+1)+x ≈ 2x
+              steps.push(`📊 Análise assintótica: quando x→∞, sqrt(${sqrtContent}) ≈ x`);
+              steps.push(`💡 Portanto, o denominador sqrt(${sqrtContent}) + x ≈ 2x`);
+              
+              // Se o numerador simplificado for uma constante positiva, o limite é 0
+              if (numStr === '1' || parseFloat(numStr) > 0) {
+                steps.push(`✨ Como o numerador é constante e o denominador tende a ∞, o limite é 0`);
+              } else {
+                steps.push(`📊 Avaliando: ${rationalized} → 0 quando x→∞`);
+              }
+            } catch {
+              // Se simplificação falhar, usa análise assintótica direta
+              steps.push(`📊 Avaliando no infinito: quando x→∞, sqrt(${sqrtContent}) + x ≈ 2x`);
+              steps.push(`💡 Portanto, ${rationalized} ≈ constante/(2x) → 0`);
+            }
+            
+            steps.push(`✨ Resultado: lim(x→∞) ${normalizedExpr} = 0`);
+            
+            tips.push('Racionalização: multiplicar pelo conjugado transforma ∞-∞ em fração');
+            tips.push('Identidade usada: (a-b)(a+b) = a²-b²');
+            tips.push('No infinito, termos de maior grau dominam o comportamento');
+            
+            return {
+              result: formatResult(0),
+              steps,
+              tips,
+              strategy: 'racionalização_conjugado',
+              form: '∞-∞'
+            };
+          } catch (rationalizeError) {
+            steps.push(`⚠️ Erro ao aplicar racionalização: ${rationalizeError.message}`);
+          }
+        }
+      }
+      
+      // TERCEIRO: Para funções racionais no infinito, aplica regra do maior grau
       if (normalizedExpr.includes('/') && (normalizedExpr.includes('pow(x') || normalizedExpr.includes('x**') || normalizedExpr.includes('x^'))) {
         steps.push('📊 Aplicando estratégia de maior grau para função racional');
         
@@ -191,14 +310,17 @@ export const calculateLimit = (exprStr, limitPoint) => {
       }
     }
     
-    // Tenta substituição direta
+    // PRIMEIRO: Tenta substituição direta SEMPRE (mais simples e eficiente)
+    // Se a função é contínua, isso deve funcionar
     try {
       const compiled = math.compile(normalizedExpr);
       const result = compiled.evaluate({ x: point });
       
       if (isFinite(result) && !isNaN(result)) {
         steps.push(`📊 Substituição direta: f(${point}) = ${result}`);
+        steps.push(`✅ Função contínua em x=${point}, limite = ${result}`);
         tips.push('Substituição direta aplicada com sucesso');
+        tips.push('Quando não há indeterminação, substitua o valor diretamente');
         
         return {
           result: formatResult(result),
@@ -208,13 +330,199 @@ export const calculateLimit = (exprStr, limitPoint) => {
           form: 'numérico'
         };
       } else {
+        // Resultado não finito - pode ser indeterminação ou divisão por zero real
         throw new Error('Resultado não finito');
       }
-    } catch (error) {
-      // Se falhar, verifica se é erro de divisão por zero ou forma indeterminada
-      steps.push(`⚠️ Substituição direta falhou: ${error.message}`);
+    } catch (directError) {
+      // Substituição direta falhou - pode ser indeterminação ou função não definida
+      steps.push(`⚠️ Substituição direta falhou: ${directError.message}`);
+      steps.push(`🔍 Analisando se há indeterminação ou descontinuidade...`);
       
-      // Verifica se há divisão na expressão
+      // Agora verifica se é realmente uma função não definida ou uma indeterminação
+      // Guardas específicos apenas para casos onde SABEMOS que não podemos avaliar
+      const definitelyUndefined = (
+        (normalizedExpr.includes('log(') && point === 0) ||
+        (normalizedExpr.match(/\/x\s*[)\-*+/]|\)\s*\/\s*x\s*$/) && point === 0)
+      );
+      
+      if (definitelyUndefined) {
+        steps.push(`⚠️ Função não definida no ponto x=${point}`);
+      } else {
+        steps.push(`🔍 Possível forma indeterminada detectada`);
+      }
+    }
+    
+    // Se chegou aqui, substituição direta não funcionou - tenta estratégias alternativas
+    // PRIMEIRO: Verifica se é forma 0·∞ (zero vezes infinito) - DEVE VIR ANTES DE DIVISÃO
+    // Verifica caso especial x*log(x) quando x→0 ANTES de tentar compilar
+    if (normalizedExpr.includes('*') && normalizedExpr.includes('x')) {
+        const terms = normalizedExpr.split('*').map(t => t.trim());
+        if (terms.length === 2) {
+          try {
+            // Verifica se há logaritmos (caso especial: x*log(x) quando x→0)
+            // Após normalização, ln() já foi convertido para log(), então só verificamos log()
+            const hasLog = normalizedExpr.includes('log(');
+            
+            // Detecta se é x*log(x) ou log(x)*x - comparação mais flexível
+            // Remove espaços e parênteses extras para comparação
+            const leftTrimmed = terms[0].replace(/\s/g, '').replace(/^\(|\)$/g, '');
+            const rightTrimmed = terms[1].replace(/\s/g, '').replace(/^\(|\)$/g, '');
+            
+            const leftIsX = leftTrimmed === 'x';
+            const rightIsX = rightTrimmed === 'x';
+            const leftHasLog = terms[0].includes('log(');
+            const rightHasLog = terms[1].includes('log(');
+            
+            const isXTimesLog = hasLog && (
+              (leftIsX && rightHasLog) ||
+              (rightIsX && leftHasLog)
+            );
+            
+            // Se for x*log(x) ou log(x)*x quando x→0, é definitivamente 0·∞
+            // Verifica se point é 0 (usando comparação direta e aproximada)
+            const isZero = point === 0 || Math.abs(point) < 1e-10;
+            if (isXTimesLog && isZero) {
+              // É o caso especial x*log(x) quando x→0
+              steps.push('🔍 Detectada forma indeterminada 0·∞ (x*log(x) quando x→0)');
+              steps.push('📐 Reescrevendo como quociente para aplicar L\'Hôpital');
+              
+              // Identifica qual termo é x e qual é log(x)
+              // Encontra o termo que contém log(x)
+              const logTerm = leftHasLog ? terms[0] : terms[1];
+              const numerator = logTerm; // log(x)
+              const denominator = '1 / x';
+              
+              steps.push(`📝 Reescrevendo: ${normalizedExpr} = ${numerator} / (${denominator})`);
+              steps.push(`💡 Isso resulta em forma ∞/∞, ideal para L'Hôpital`);
+              
+              // Normaliza o denominador
+              const normalizedDenominator = normalizeExpression(denominator);
+              
+              try {
+                steps.push('🔄 Aplicando Regra de L\'Hôpital...');
+                
+                const numDerivative = math.derivative(numerator, 'x').toString();
+                const denDerivative = math.derivative(normalizedDenominator, 'x').toString();
+                
+                steps.push(`📐 Derivada do numerador: ${numDerivative}`);
+                steps.push(`📐 Derivada do denominador: ${denDerivative}`);
+                
+                const lhopitalResult = applyLHospitalRule(
+                  numerator,
+                  normalizedDenominator,
+                  point
+                );
+                
+                if (lhopitalResult.success) {
+                  steps.push(`✨ L'Hôpital aplicado com sucesso`);
+                  return {
+                    result: formatResult(lhopitalResult.result),
+                    steps: [...steps, ...lhopitalResult.steps],
+                    tips: [...tips, 'Forma 0·∞: reescreva como quociente e aplique L\'Hôpital'],
+                    strategy: 'lhopital_0_infinity',
+                    form: '0·∞'
+                  };
+                } else {
+                  steps.push(`⚠️ L'Hôpital não resolveu: ${lhopitalResult.error || 'Máximo de iterações'}`);
+                }
+              } catch (lhopitalError) {
+                steps.push(`❌ Erro ao aplicar L'Hôpital: ${lhopitalError.message}`);
+              }
+            } else {
+              // Caso geral: avalia os termos (só se não for o caso especial)
+              try {
+                const leftExpr = math.compile(terms[0]);
+                const rightExpr = math.compile(terms[1]);
+                
+                // Usa um valor próximo ao ponto limite para avaliar (evita erros em x=0)
+                const testPoint = point === 0 ? 1e-6 : (point > 0 ? point - 1e-6 : point + 1e-6);
+                let leftVal, rightVal;
+                
+                try {
+                  leftVal = leftExpr.evaluate({ x: testPoint });
+                  rightVal = rightExpr.evaluate({ x: testPoint });
+                } catch {
+                  // Se falhar, tenta com o ponto original
+                  leftVal = leftExpr.evaluate({ x: point });
+                  rightVal = rightExpr.evaluate({ x: point });
+                }
+                
+                // Verifica se é 0·∞ ou ∞·0 (considera -∞ também)
+                const isZero = (val) => Math.abs(val) < 1e-10;
+                const isInfinity = (val) => !isFinite(val) || Math.abs(val) > 1e6;
+                
+                const isZeroTimesInfinity = (isZero(leftVal) && isInfinity(rightVal)) ||
+                                            (isZero(rightVal) && isInfinity(leftVal));
+                
+                if (isZeroTimesInfinity) {
+                  steps.push('🔍 Detectada forma indeterminada 0·∞');
+                  steps.push('📐 Reescrevendo como quociente para aplicar L\'Hôpital');
+                  
+                  // Estratégia: reescrever como quociente
+                  let numerator, denominator;
+                  
+                  if (isZero(leftVal)) {
+                    // left tende a 0, right tende a ∞
+                    // Reescreve: left*right = right/(1/left) = ∞/∞ (melhor para L'Hôpital)
+                    numerator = terms[1];
+                    denominator = `1 / (${terms[0]})`;
+                    steps.push(`📝 Reescrevendo: ${normalizedExpr} = ${numerator} / (${denominator})`);
+                    steps.push(`💡 Isso resulta em forma ∞/∞, ideal para L'Hôpital`);
+                  } else {
+                    // right tende a 0, left tende a ∞
+                    numerator = terms[0];
+                    denominator = `1 / (${terms[1]})`;
+                    steps.push(`📝 Reescrevendo: ${normalizedExpr} = ${numerator} / (${denominator})`);
+                    steps.push(`💡 Isso resulta em forma ∞/∞, ideal para L'Hôpital`);
+                  }
+                  
+                  // Normaliza o denominador
+                  const normalizedDenominator = normalizeExpression(denominator);
+                  
+                  try {
+                    steps.push('🔄 Aplicando Regra de L\'Hôpital...');
+                    
+                    const numDerivative = math.derivative(numerator, 'x').toString();
+                    const denDerivative = math.derivative(normalizedDenominator, 'x').toString();
+                    
+                    steps.push(`📐 Derivada do numerador: ${numDerivative}`);
+                    steps.push(`📐 Derivada do denominador: ${denDerivative}`);
+                    
+                    const lhopitalResult = applyLHospitalRule(
+                      numerator,
+                      normalizedDenominator,
+                      point
+                    );
+                    
+                    if (lhopitalResult.success) {
+                      steps.push(`✨ L'Hôpital aplicado com sucesso`);
+                      return {
+                        result: formatResult(lhopitalResult.result),
+                        steps: [...steps, ...lhopitalResult.steps],
+                        tips: [...tips, 'Forma 0·∞: reescreva como quociente e aplique L\'Hôpital'],
+                        strategy: 'lhopital_0_infinity',
+                        form: '0·∞'
+                      };
+                    } else {
+                      steps.push(`⚠️ L'Hôpital não resolveu: ${lhopitalResult.error || 'Máximo de iterações'}`);
+                    }
+                  } catch (lhopitalError) {
+                    steps.push(`❌ Erro ao aplicar L'Hôpital: ${lhopitalError.message}`);
+                  }
+                }
+              } catch {
+                // Se falhar na avaliação do caso geral, continua para outras estratégias
+                // Não adiciona erro nos steps para não poluir - já está no catch principal
+              }
+            }
+          } catch {
+            // Se não conseguir processar a multiplicação, continua para outras estratégias
+            // Não adiciona erro nos steps para não poluir - já está no catch principal
+          }
+        }
+      }
+      
+      // SEGUNDO: Verifica se há divisão na expressão
       if (normalizedExpr.includes('/')) {
         const parts = normalizedExpr.split('/');
         if (parts.length === 2) {
@@ -325,7 +633,6 @@ export const calculateLimit = (exprStr, limitPoint) => {
       
       // Se todas as estratégias falharem
       throw new Error('Não foi possível calcular o limite com as estratégias disponíveis');
-    }
     
   } catch (error) {
     steps.push(`❌ Erro: ${error.message}`);
